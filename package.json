@@ -1,0 +1,9 @@
+{
+  "name": "mam.client.js",
+  "private": false,
+  "version": "0.0.1",
+  "dependencies": {
+    "iota.crypto.js": "iotaledger/iota.crypto.js",
+    "iota.lib.js": "^0.4.1"
+  }
+}
