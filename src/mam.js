@@ -1,4 +1,4 @@
-const IOTA = require("./dist/MAM")
+const IOTA = require("./MAM.rs.js")
 
 /* ======= CTrits bindings ======= */
 const TritEncoding = {
@@ -178,13 +178,13 @@ function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
   }
   // Clean up memory. Unneccessary for this example script, but should be done when running in a production
   // environment.
-  // iota_merkle_branch_drop(root_branch)
-  // iota_merkle_branch_drop(next_root_branch)
-  // iota_merkle_drop(root_merkle)
-  // iota_merkle_drop(next_root_merkle)
-  // ;[SEED_trits, MESSAGE_trits, SIDE_KEY_trits, root, next_root].forEach(
-  //   iota_ctrits_drop
-  // )
+  iota_merkle_branch_drop(root_branch)
+  iota_merkle_branch_drop(next_root_branch)
+  iota_merkle_drop(root_merkle)
+  iota_merkle_drop(next_root_merkle)
+  ;[SEED_trits, MESSAGE_trits, SIDE_KEY_trits, root, next_root].forEach(
+    iota_ctrits_drop
+  )
   return response
 }
 

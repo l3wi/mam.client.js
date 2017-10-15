@@ -1,4 +1,4 @@
-var MAM = require("./mam")
+var MAM = require("../src/mam")
 
 // MAM settings
 const SEED =
@@ -18,4 +18,18 @@ let CHANNEL = {
 
 let message = MAM.createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL)
 let decoded = MAM.decodeMessage(message.payload, null, message.root)
-console.log(message)
+console.log(message.root)
+console.log(decoded)
+
+let CHANNEL2 = {
+  security: 2,
+  start: 0,
+  count: 2,
+  next_count: 1,
+  index: 1
+}
+
+let message2 = MAM.createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL2)
+let decoded2 = MAM.decodeMessage(message2.payload, null, message2.root)
+console.log(message2.root)
+console.log(decoded2)
