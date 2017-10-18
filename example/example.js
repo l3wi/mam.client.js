@@ -11,7 +11,7 @@ const SIDE_KEY =
 let CHANNEL = {
   security: 2,
   start: 0,
-  count: 2,
+  count: 1,
   next_count: 1,
   index: 0
 }
@@ -23,10 +23,10 @@ console.log(decoded)
 
 let CHANNEL2 = {
   security: 2,
-  start: 0,
-  count: 2,
+  start: 1,
+  count: 1,
   next_count: 1,
-  index: 1
+  index: 0
 }
 
 let message2 = MAM.createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL2)
