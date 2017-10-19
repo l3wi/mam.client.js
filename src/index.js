@@ -7,7 +7,7 @@ const pify = require("pify")
 
 /// MAM Interface
 var MAM = require("./mam")
-//
+// Setup Provider
 let iota = new IOTA({ provider: `http://p101.iotaledger.net:14700` })
 
 const init = (seed = keyGen(81), security = 2) => {
@@ -19,7 +19,7 @@ const init = (seed = keyGen(81), security = 2) => {
     next_root: null,
     security: security,
     start: 0,
-    count: 2,
+    count: 1,
     next_count: 1,
     index: 0
   }
@@ -44,10 +44,21 @@ const subscribe = (state, channelRoot, channelKey = null) => {
   return state
 }
 
-const create = (state, message = "HALLOTHAR") => {
-  let mam = MAM.createMessage(state.seed, message, null, state.channel)
-  state.channel.index++
-  state.channel.next_root = mam.next_root
+const create = (state, message) => {
+  var channel = state.channel
+  let mam = MAM.createMessage(state.seed, message, null, channel)
+  // If the tree is exhausted.
+  if (channel.index == channel.count - 1) {
+    // change start to begining of next tree.
+    channel.start = channel.next_count
+    // Reset index.
+    channel.index = 0
+  } else {
+    //Else step the tree.
+    channel.index++
+  }
+  channel.next_root = mam.next_root
+  state.channel = channel
   return {
     state,
     payload: mam.payload,
@@ -85,7 +96,7 @@ const fetch = async address => {
     let messagesGen = await txHashesToMessages(hashes)
     for (let message of messagesGen) {
       try {
-        var payload = message.split("EEEE")[0]
+        var payload = message.split("AEIAEI")[0]
         console.log(payload.length)
         console.log(message.length)
         let unmasked = decode(payload, null, nextRoot)
@@ -139,7 +150,7 @@ const attach = async (trytes, root) => {
     {
       address: root,
       value: 0,
-      message: trytes + `EEEE`
+      message: trytes + `AEIAEI`
     }
   ]
   // if (isClient) curl.overrideAttachToTangle(iota)
@@ -172,35 +183,10 @@ const keyGen = length => {
   return result.join("")
 }
 
-///////////////////
-const test = async () => {
-  let state = init()
-  console.log("Creating MAM payload")
-  var message1 = create(state, `POTATO`)
-  state = message1.state
-  console.log("Index: ", state.channel.index)
-  console.log("Root: ", message1.root)
-
-  await attach(message1.payload, message1.root)
-
-  console.log("Creating MAM payload")
-  var message2 = create(state, `POTATO`)
-  state = message2.state
-  console.log("Index: ", state.channel.index)
-  console.log("Root: ", message2.root)
-
-  await attach(message2.payload, message2.root)
-
-  var data = await fetch(message1.root)
-
-  console.log(data.messages)
+module.exports = {
+  init: init,
+  create: create,
+  decode: decode,
+  fetch: fetch,
+  attach: attach
 }
-
-test()
-// var message2 = create(state)
-// state = message2.state
-// console.log(message2)
-
-// var message3 = create(state)
-// state = message3.state
-// console.log(message3)
