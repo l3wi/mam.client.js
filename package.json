@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "main": "lib/library.js",
   "scripts": {
-    "build": "webpack --env build",
+    "build": "webpack --env build --progress",
     "dev": "webpack --progress --colors --watch --env dev",
     "test":
       "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
@@ -22,9 +22,10 @@
     "babel-eslint": "8.0.1",
     "babel-loader": "7.1.2",
     "babel-plugin-add-module-exports": "0.2.1",
-    "babel-preset-env": "6.24.1",
+    "babel-preset-env": "1.6.1",
     "chai": "4.1.2",
     "mocha": "4.0.1",
+    "rust-emscripten-loader": "^0.0.1",
     "webpack": "3.7.1",
     "yargs": "7.1.0"
   }

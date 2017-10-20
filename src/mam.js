@@ -1,4 +1,4 @@
-const IOTA = require("./MAM.rs.js")
+const IOTA = require("../iota-bindings/emscripten/src/main.rs")
 
 /* ======= CTrits bindings ======= */
 const TritEncoding = {

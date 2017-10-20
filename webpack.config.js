@@ -5,14 +5,14 @@ const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin
 const path = require("path")
 const env = require("yargs").argv.env // use --env with webpack 2
 
-let libraryName = "mam.client"
+var libraryName = "mam.client"
 
-let plugins = [],
+var plugins = [],
   outputFile
 
 if (env === "build") {
-  plugins.push(new UglifyJsPlugin({ minimize: true }))
-  outputFile = libraryName + ".min.js"
+  // plugins.push(new UglifyJsPlugin({ minimize: true }))
+  outputFile = libraryName + ".js"
 } else {
   outputFile = libraryName + ".js"
 }
@@ -29,13 +29,11 @@ const config = {
   },
   module: {
     rules: [
+      { test: /\.rs$/, loader: "rust-emscripten-loader" },
       {
         test: /(\.jsx|\.js)$/,
         loader: "babel-loader",
-        exclude: [
-          /(node_modules|bower_components)/,
-          path.resolve(__dirname, "src/MAM.rs.js")
-        ]
+        exclude: [/(node_modules|bower_components)/]
       }
     ]
   },
@@ -45,7 +43,8 @@ const config = {
   },
   node: {
     fs: "empty",
-    child_process: "empty"
+    child_process: "empty",
+    path: "empty"
   },
   plugins: plugins
 }
