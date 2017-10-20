@@ -29,7 +29,13 @@ const config = {
   },
   module: {
     rules: [
-      { test: /\.rs$/, loader: "rust-emscripten-loader" },
+      {
+        test: /\.rs$/,
+        loader: "rust-emscripten-loader",
+        options: {
+          release: true
+        }
+      },
       {
         test: /(\.jsx|\.js)$/,
         loader: "babel-loader",

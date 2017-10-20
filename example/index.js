@@ -19,6 +19,14 @@ const example = async () => {
   // Attach that message
   await Mam.attach(message2.payload, message2.root)
 
+  // Create Message Two
+  console.log("Creating MAM payload")
+  var message3 = Mam.create(state, `MASHEPOTATOE`)
+  state = message3.state
+  console.log("Root: ", message3.root)
+  // Attach that message
+  await Mam.attach(message3.payload, message3.root)
+
   state = Mam.subscribe(state, message1.root)
 
   // Fetch data starting from root one!
