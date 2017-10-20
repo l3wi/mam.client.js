@@ -95,9 +95,7 @@ const fetch = async address => {
     let messagesGen = await txHashesToMessages(hashes)
     for (let message of messagesGen) {
       try {
-        var payload = message.split("AEIAEI")[0]
-        console.log(payload.length)
-        console.log(message.length)
+        var payload = message
         let unmasked = decode(payload, null, nextRoot)
         messages.push(unmasked.payload)
         nextRoot = unmasked.next_root
@@ -159,7 +157,7 @@ const attach = async (trytes, root) => {
     {
       address: root,
       value: 0,
-      message: trytes + `AEIAEI`
+      message: trytes
     }
   ]
   // if (isClient) curl.overrideAttachToTangle(iota)
