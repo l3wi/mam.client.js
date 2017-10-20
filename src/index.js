@@ -35,10 +35,9 @@ const init = (seed = keyGen(81), security = 2) => {
 const subscribe = (state, channelRoot, channelKey = null) => {
   state.subscribed[channelRoot] = {
     channelKey: channelKey,
-    timeout: 1000,
-    root: null,
+    timeout: 5000,
+    root: channelRoot,
     next_root: null,
-    next_key: null,
     active: true
   }
   return state
@@ -116,6 +115,16 @@ const fetch = async address => {
   }
 }
 
+const listen = (channel, callback) => {
+  var root = channel.root
+  return setTimeout(async () => {
+    console.log("Fetching")
+    var resp = await fetch(root)
+    root = resp.nextRoot
+    callback(resp.messages)
+  }, channel.timeout)
+}
+
 // Sync requests
 const txHashesToMessages = async hashes => {
   let bundles = {}
@@ -185,8 +194,10 @@ const keyGen = length => {
 
 module.exports = {
   init: init,
+  subscribe: subscribe,
   create: create,
   decode: decode,
   fetch: fetch,
-  attach: attach
+  attach: attach,
+  listen: listen
 }

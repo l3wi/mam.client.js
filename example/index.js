@@ -19,11 +19,14 @@ const example = async () => {
   // Attach that message
   await Mam.attach(message2.payload, message2.root)
 
-  // Fetch data starting from root one!
-  var data = await Mam.fetch(message1.root)
+  state = Mam.subscribe(state, message1.root)
 
-  // Show messages
-  console.log(data.messages)
+  // Fetch data starting from root one!
+  var listener = Mam.listen(state.subscribed[message1.root], logData)
+  // console.log(listener)
+  // setTimeout(() => clearInterval(listener), 20000)
 }
+
+const logData = data => console.log(data)
 
 example()
