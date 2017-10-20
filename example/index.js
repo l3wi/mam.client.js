@@ -1,4 +1,4 @@
-var Mam = require("../src/index.js")
+var Mam = require("../lib/mam.client.js")
 
 const example = async () => {
   // Init State

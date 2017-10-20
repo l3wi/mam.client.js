@@ -41,6 +41,7 @@ const config = {
     modules: [path.resolve("./node_modules"), path.resolve("./src")],
     extensions: [".json", ".js"]
   },
+  target: "node",
   node: {
     fs: "empty",
     child_process: "empty",
