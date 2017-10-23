@@ -6,15 +6,15 @@
   "scripts": {
     "build": "webpack --env build --progress",
     "dev": "webpack --progress --colors --watch --env dev",
-    "test":
-      "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
-    "test:watch":
-      "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
+    "test": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
+    "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "iota.crypto.js": "iotaledger/iota.crypto.js",
     "iota.lib.js": "^0.4.1",
-    "pify": "^3.0.0"
+    "pify": "^3.0.0",
+    "rust-wasm-loader": "^0.1.2"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
