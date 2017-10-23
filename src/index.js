@@ -1,16 +1,16 @@
 /// Deps
-const crypto = require("crypto")
-const Crypto = require("iota.crypto.js")
-const Encryption = require("./encryption")
-const IOTA = require("iota.lib.js")
-const pify = require("pify")
-
-/// MAM Interface
-var MAM = require("./mam")
+require('babel-polyfill')
+const crypto = require('crypto')
+const Crypto = require('iota.crypto.js')
+const Encryption = require('./encryption')
+const pify = require('pify')
 // Setup Provider
-let iota = new IOTA({ provider: `http://p101.iotaledger.net:14700` })
+var iota = {}
+var Mam = {}
 
-const init = (seed = keyGen(81), security = 2) => {
+const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
+  // Set IOTA object
+  iota = externalIOTA
   // Setup Personal Channel
   var channelSeed = Encryption.hash(Crypto.converter.trits(seed.slice()))
   var channelKey = Crypto.converter.trytes(channelSeed.slice())
@@ -45,11 +45,11 @@ const subscribe = (state, channelRoot, channelKey = null) => {
 
 const create = (state, message) => {
   var channel = state.channel
-  let mam = MAM.createMessage(state.seed, message, null, channel)
+  let mam = Mam.createMessage(state.seed, message, null, channel)
   // If the tree is exhausted.
   if (channel.index == channel.count - 1) {
     // change start to begining of next tree.
-    channel.start = channel.next_count
+    channel.start = channel.next_count + channel.start
     // Reset index.
     channel.index = 0
   } else {
@@ -65,8 +65,12 @@ const create = (state, message) => {
   }
 }
 
+// Current root
+const getRoot = state => {
+  return Mam.getMamRoot(state.seed, state.channel)
+}
 const decode = (payload, side_key, root) => {
-  let mam = MAM.decodeMessage(payload, side_key, root)
+  let mam = Mam.decodeMessage(payload, side_key, root)
   return mam
 }
 
@@ -79,7 +83,7 @@ const fetch = async address => {
   let messageCount = 0
 
   while (!consumedAll) {
-    console.log("Looking up data at: ", nextRoot)
+    console.log('Looking up data at: ', nextRoot)
     let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
       addresses: [nextRoot]
     })
@@ -100,12 +104,12 @@ const fetch = async address => {
         messages.push(unmasked.payload)
         nextRoot = unmasked.next_root
       } catch (e) {
-        console.error("failed to parse: ", e)
+        console.error('failed to parse: ', e)
       }
     }
   }
 
-  console.log("Total transaction count: ", transactionCount)
+  console.log('Total transaction count: ', transactionCount)
 
   return {
     nextRoot: nextRoot,
@@ -116,7 +120,7 @@ const fetch = async address => {
 const listen = (channel, callback) => {
   var root = channel.root
   return setTimeout(async () => {
-    console.log("Fetching")
+    console.log('Fetching')
     var resp = await fetch(root)
     root = resp.nextRoot
     callback(resp.messages)
@@ -142,7 +146,7 @@ const txHashesToMessages = async hashes => {
     if (bundles[bundle].length == maxIdx + 1) {
       let l = bundles[bundle]
       delete bundles[bundle]
-      return l.sort((a, b) => b[0] < a[0]).reduce((acc, n) => acc + n[1], "")
+      return l.sort((a, b) => b[0] < a[0]).reduce((acc, n) => acc + n[1], '')
     }
   }
 
@@ -168,27 +172,28 @@ const attach = async (trytes, root) => {
       9,
       transfers
     )
-    console.log("Message attached")
+    console.log('Message attached')
     return objs
   } catch (e) {
-    return console.error("failed to attach message:", "\n", e)
+    return console.error('failed to attach message:', '\n', e)
   }
 }
 
 const isClient =
-  typeof window !== "undefined" &&
+  typeof window !== 'undefined' &&
   window.document &&
   window.document.createElement
 
 const keyGen = length => {
-  var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ9"
+  var charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9'
   var values = crypto.randomBytes(length)
   var result = new Array(length)
   for (var i = 0; i < length; i++) {
     result[i] = charset[values[i] % charset.length]
   }
-  return result.join("")
+  return result.join('')
 }
+const setupEnv = IOTA => (Mam = IOTA)
 
 module.exports = {
   init: init,
@@ -197,5 +202,7 @@ module.exports = {
   decode: decode,
   fetch: fetch,
   attach: attach,
-  listen: listen
+  listen: listen,
+  getRoot: getRoot,
+  setupEnv: setupEnv
 }
