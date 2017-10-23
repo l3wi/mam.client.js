@@ -4,10 +4,12 @@
   "version": "0.0.1",
   "main": "lib/library.js",
   "scripts": {
-    "build": "webpack --env build --progress",
-    "dev": "webpack --progress --colors --watch --env dev",
-    "test": "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
-    "test:watch": "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
+    "web": "webpack --progress --colors --watch",
+    "node": "webpack --progress --colors --watch --env node",
+    "test":
+      "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
+    "test:watch":
+      "mocha --compilers js:babel-core/register --colors -w ./test/*.spec.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",

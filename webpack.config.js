@@ -5,56 +5,66 @@ const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin
 const path = require('path')
 const env = require('yargs').argv.env // use --env with webpack 2
 
-var libraryName = 'mam.client'
+let output = env.path !== undefined ? env.path : 'lib/'
+let libraryName = 'mam.'
+let entry
+let target
+let outputFile
+let rules = [
+  {
+    test: /(\.jsx|\.js)$/,
+    loader: 'babel-loader',
+    exclude: [/(node_modules|bower_components)/]
+  }
+]
 
-var plugins = [],
-  outputFile
-
-if (env === 'build') {
-  // plugins.push(new UglifyJsPlugin({ minimize: true }))
-  outputFile = libraryName + '.js'
+if (env === 'node') {
+  entry = __dirname + '/src/node.js'
+  outputFile = libraryName + 'node.js'
+  target = 'node'
+  rules.push({
+    test: /\.rs$/,
+    loader: 'rust-emscripten-loader',
+    options: {
+      release: true
+    }
+  })
 } else {
-  outputFile = libraryName + '.js'
+  entry = __dirname + '/src/web.js'
+  outputFile = libraryName + 'web.js'
+  target = 'web'
+  rules.push({
+    test: /\.rs$/,
+    loader: 'rust-wasm-loader',
+    options: {
+      release: true,
+      path: output + '/'
+    }
+  })
 }
-
+console.log(output)
 const config = {
-  entry: __dirname + '/src/index.js',
+  entry: entry,
   output: {
-    path: __dirname + '/static',
+    path: __dirname + '/' + output,
     filename: outputFile,
     library: libraryName,
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
   module: {
-    rules: [
-      {
-        test: /\.rs$/,
-        // loader: 'rust-emscripten-loader',
-        loader: 'rust-wasm-loader',
-        options: {
-          release: true,
-          path: 'static/'
-        }
-      },
-      {
-        test: /(\.jsx|\.js)$/,
-        loader: 'babel-loader',
-        exclude: [/(node_modules|bower_components)/]
-      }
-    ]
+    rules: rules
   },
   resolve: {
     modules: [path.resolve('./node_modules'), path.resolve('./src')],
     extensions: ['.json', '.js']
   },
-  // target: 'node',
+  target: target,
   node: {
     fs: 'empty',
     child_process: 'empty',
     path: 'empty'
-  },
-  plugins: plugins
+  }
 }
-
+console.log(config.output)
 module.exports = config
