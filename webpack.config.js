@@ -1,57 +1,58 @@
 /* global __dirname, require, module*/
 
-const webpack = require("webpack")
+const webpack = require('webpack')
 const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin
-const path = require("path")
-const env = require("yargs").argv.env // use --env with webpack 2
+const path = require('path')
+const env = require('yargs').argv.env // use --env with webpack 2
 
-var libraryName = "mam.client"
+var libraryName = 'mam.client'
 
 var plugins = [],
   outputFile
 
-if (env === "build") {
+if (env === 'build') {
   // plugins.push(new UglifyJsPlugin({ minimize: true }))
-  outputFile = libraryName + ".js"
+  outputFile = libraryName + '.js'
 } else {
-  outputFile = libraryName + ".js"
+  outputFile = libraryName + '.js'
 }
 
 const config = {
-  entry: __dirname + "/src/index.js",
-  devtool: "source-map",
+  entry: __dirname + '/src/index.js',
   output: {
-    path: __dirname + "/lib",
+    path: __dirname + '/static',
     filename: outputFile,
     library: libraryName,
-    libraryTarget: "umd",
+    libraryTarget: 'umd',
     umdNamedDefine: true
   },
   module: {
     rules: [
       {
         test: /\.rs$/,
-        loader: "rust-emscripten-loader",
+        // loader: 'rust-emscripten-loader',
+        loader: 'rust-wasm-loader',
         options: {
-          release: true
+          release: true,
+          path: 'static/'
         }
       },
       {
         test: /(\.jsx|\.js)$/,
-        loader: "babel-loader",
+        loader: 'babel-loader',
         exclude: [/(node_modules|bower_components)/]
       }
     ]
   },
   resolve: {
-    modules: [path.resolve("./node_modules"), path.resolve("./src")],
-    extensions: [".json", ".js"]
+    modules: [path.resolve('./node_modules'), path.resolve('./src')],
+    extensions: ['.json', '.js']
   },
-  target: "node",
+  // target: 'node',
   node: {
-    fs: "empty",
-    child_process: "empty",
-    path: "empty"
+    fs: 'empty',
+    child_process: 'empty',
+    path: 'empty'
   },
   plugins: plugins
 }
