@@ -19,6 +19,8 @@ Additionally, due to quirks in the `rust-wasm-loader` you will need to adjust th
 ```javascript
 // Install dependencies
 yarn
+// Install submodules
+git submodule update --init --recursive
 // Build for web
 yarn web -- --env.path=serving/path/here/     
 ```
@@ -30,11 +32,11 @@ The below command will build a file called `mam.node.js` in the `lib/` directory
 ```javascript
 // Install dependencies
 yarn
+// Install submodules
+git submodule update --init --recursive
 // Build for node
 yarn node
 ```
-
-
 
 ## Concepts
 
@@ -45,3 +47,6 @@ Public - Root is equal to address and the side key is ‘999999…’
 Private - WIP
 
 Restricted - WIP
+
+
+

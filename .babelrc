@@ -4,8 +4,8 @@
       "env",
       {
         "targets": {
-          "browsers": ["last 2 versions"],
-          "node": "current"
+          "browsers": "> 5%",
+          "node": "4.1.1"
         },
         "debug": true
       }

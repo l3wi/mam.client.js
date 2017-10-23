@@ -1,6 +1,6 @@
-var Mam = require('../static/mam.node.js')
+var Mam = require('../lib/mam.node.js')
 var IOTA = require('iota.lib.js')
-var iota = new IOTA({ provider: `http://p101.iotaledger.net:14700/` })
+var iota = new IOTA({ provider: `http://p103.iotaledger.net:14700/` })
 
 const example = async () => {
   // Init State

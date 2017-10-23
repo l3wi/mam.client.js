@@ -5,12 +5,12 @@ const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin
 const path = require('path')
 const env = require('yargs').argv.env // use --env with webpack 2
 
-let output = env.path !== undefined ? env.path : 'lib/'
-let libraryName = 'mam.'
-let entry
-let target
-let outputFile
-let rules = [
+var output = env.path !== undefined ? env.path : 'lib/'
+var libraryName = 'mam.'
+var entry
+var target
+var outputFile
+var rules = [
   {
     test: /(\.jsx|\.js)$/,
     loader: 'babel-loader',
