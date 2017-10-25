@@ -8,6 +8,12 @@ const pify = require('pify')
 var iota = {}
 var Mam = {}
 
+/**
+ * Initialisation function which returns a state object
+ * @param  {object} externalIOTA
+ * @param  {string} seed
+ * @param  {integer} security
+ */
 const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
   // Set IOTA object
   iota = externalIOTA
@@ -31,7 +37,12 @@ const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
     seed: seed
   }
 }
-
+/**
+ * Add a subscription to your state object
+ * @param  {object} state
+ * @param  {string} channelRoot
+ * @param  {string} channelKey
+ */
 const subscribe = (state, channelRoot, channelKey = null) => {
   state.subscribed[channelRoot] = {
     channelKey: channelKey,
@@ -42,10 +53,19 @@ const subscribe = (state, channelRoot, channelKey = null) => {
   }
   return state
 }
-
-const create = (state, message) => {
+/**
+ * cretae 
+ * @param  {object} state
+ * @param  {sting} message // Tryte encoded string
+ */
+const create = (state, message, sidekey) => {
   var channel = state.channel
-  let mam = Mam.createMessage(state.seed, message, null, channel)
+  let mam = Mam.createMessage(
+    state.seed,
+    message,
+    sidekey || channel.side_key,
+    channel
+  )
   // If the tree is exhausted.
   if (channel.index == channel.count - 1) {
     // change start to begining of next tree.

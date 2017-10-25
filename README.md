@@ -22,7 +22,7 @@ yarn
 // Install submodules
 git submodule update --init --recursive
 // Build for web
-yarn web -- --env.path=serving/path/here/     
+yarn web -- --env.path=/serving/path/here/     
 ```
 
 ### Node.js
