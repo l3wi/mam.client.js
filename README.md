@@ -2,9 +2,7 @@
 
 This is wrapper library for the WASM/ASM.js output of the [MAM Rust repository](https://github.com/iotaledger/MAM). This will enable you to interact and create MAM streams without any further software.
 
-> **Join the Discussion**
->
-> If you want to get involved in the community, need help with getting setup, have any issues related with the library or just want to discuss Blockchain, Distributed Ledgers and IoT with other people, feel free to join our Slack. [Slack](http://slack.iota.org/) You can also ask questions on our dedicated forum at: [IOTA Forum](https://forum.iota.org/).
+> This is a work in progress. The library is usable, however it is still evolving and may have some breaking changes in the future. These will most likely be minor, in addition to extending functionality.
 
 ## Getting Started
 
@@ -12,10 +10,10 @@ After downloading the appropriate file for your project, `mam.node.js` or `mam.w
 
 For a simple user experience you are advised to call the `init()` function to enable to tracking of state in your channels.When calling `init()` you should also pass in your initialised IOTA library.  This will provide access to some extra functionality including attaching, fetching and subscribing.
 
+> *Please see example/index.js for a working example*
+
 
 ## Basic Usage
-
-------
 
 ### `init`
 
@@ -81,6 +79,7 @@ Mam.decode(payload, sideKey, root)
 
 
 
+
 ## Building the library
 
 Compiled binaries are included in the repository. Compiling the Rust bindings can require some complex environmental setup to get to work, so if you are unfamiliar just stick to the compiled files. 
@@ -114,3 +113,5 @@ git submodule update --init --recursive
 // Build for node
 yarn node
 ```
+
+
