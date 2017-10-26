@@ -14,7 +14,6 @@ For a simple user experience you are advised to call the `init()` function to en
 
 > *Please see example/index.js for a working example*
 
-
 ## Basic Usage
 
 ### `init`
@@ -31,7 +30,7 @@ Mam.init(iota, seed, security)
 2. **seed**: `String` Tryte-encoded seed. *Null value generates a random seed*
 3. **security**: `Integer` Security of the keys used. *Null value default to `2`*
 
-#### Return Value
+#### Return
 
 1. **Object** - Initialised state object to be used in future actions
 
@@ -49,13 +48,13 @@ Mam.create(state, message, sideKey)
 
 1. **state**: `Object` Initialised IOTA library with a provider set.
 2. **message**: `String` Tryte-encoded payload to be encrypted.
-3. **sideKey**: `Integer` Security of the keys used. *Null value falls back to default key`*
+3. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
 
-#### Return Value
+#### Return
 
 1. **state**: `Object` Updated state object to be used with future actions/
 2. **payload**: `String` Tryte-encoded payload.
-3. **root**: `String` Tryte-encoded root used as an address to attach the payload..
+3. **root**: `String` Tryte-encoded root used as an address to attach the payload.
 
 ------
 
@@ -70,17 +69,61 @@ Mam.decode(payload, sideKey, root)
 ```
 
 1. **state**: `Object` Initialised IOTA library with a provider set.
-2. **message**: `String` Tryte-encoded payload to be encrypted.
-3. **sideKey**: `Integer` Security of the keys used. *Null value falls back to default key`*
+2. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
+3. **root**: `String` Tryte-encoded string used as the address to attach the payload.
 
-#### Return Value
+#### Return
 
 1. **state**: `Object` Updated state object to be used with future actions/
 2. **payload**: `String` Tryte-encoded payload.
 3. **root**: `String` Tryte-encoded root used as an address to attach the payload..
 
 
+## Network Usage
 
+These actions require an initialised IOTA library with a provider to be passed in when calling `Mam.init(iota)`.
+
+------
+
+### `attach` - async
+
+Attaches a payload to the tangle 
+
+#### Input
+
+```
+await Mam.attach(payload, root)
+```
+
+1. **payload**: `String` Tryte-encoded payload to be attached to the tsangle.
+2. **root**: `String` Tryte-encoded string returned from the `Mam.create()` function.
+
+#### Return
+
+1. `Object` Transaction objects that have been attached to the network.
+
+------
+
+### `fetch` - async
+
+Fetches the stream sequentially from a known `root` and and optional `sidekey`. This call can be used in two ways: **Without a callback** will cause the function to read the entire stream before returning. **With a callback** the application will return data through the callback and finally the `nextroot` when finished.
+
+See examples: `fetchSync.js` & `fetchAsync.js` usage examples. 
+
+#### Input
+
+```
+await Mam.fetch(root, sidekey, callback)
+```
+
+1. **root**: `String` Tryte-encoded string used as the entry point to a stream.
+2. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
+3. **callback**: `Function` Tryte-encoded encryption key. *Null value will cause the function*
+
+#### Return
+
+1. **nextRoot**: `String` Tryte-encoded string pointing to the next root.
+2. **messages**: `Array` Array of Tryte-encoded messages from the stream. *NOTE: This is only returned when the call is **not** using a callback*
 
 ## Building the library
 
