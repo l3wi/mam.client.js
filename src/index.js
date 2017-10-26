@@ -94,9 +94,9 @@ const decode = (payload, side_key, root) => {
   return mam
 }
 
-const fetch = async address => {
+const fetch = async (address, sidekey, callback) => {
   let consumedAll = false
-  let messages = []
+  if (!callback) var messages = []
   let nextRoot = address
 
   let transactionCount = 0
@@ -119,9 +119,14 @@ const fetch = async address => {
     let messagesGen = await txHashesToMessages(hashes)
     for (let message of messagesGen) {
       try {
-        var payload = message
-        let unmasked = decode(payload, null, nextRoot)
-        messages.push(unmasked.payload)
+        // Unmask the message
+        let unmasked = decode(message, sidekey, nextRoot)
+        // Push payload into the messages array
+        if (!callback) {
+          messages.push(unmasked.payload)
+        } else {
+          callback(unmasked.payload)
+        }
         nextRoot = unmasked.next_root
       } catch (e) {
         console.error('failed to parse: ', e)
@@ -131,10 +136,10 @@ const fetch = async address => {
 
   console.log('Total transaction count: ', transactionCount)
 
-  return {
-    nextRoot: nextRoot,
-    messages: messages
-  }
+  let resp = {}
+  resp.nextRoot = nextRoot
+  if (!callback) resp.messages = messages
+  return resp
 }
 
 const listen = (channel, callback) => {
