@@ -151,7 +151,7 @@ const fetchSingle = async (address, sidekey) => {
   for (let message of messagesGen) {
     try {
       // Unmask the message
-      let unmasked = decode(message, sidekey, nextRoot)
+      let unmasked = decode(message, sidekey, address)
       // Return payload
       return { payload: unmasked.payload, nextRoot: unmasked.next_root }
     } catch (e) {
