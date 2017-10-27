@@ -142,6 +142,24 @@ const fetch = async (address, sidekey, callback) => {
   return resp
 }
 
+const fetchSingle = async (address, sidekey) => {
+  let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
+    addresses: [address]
+  })
+
+  let messagesGen = await txHashesToMessages(hashes)
+  for (let message of messagesGen) {
+    try {
+      // Unmask the message
+      let unmasked = decode(message, sidekey, nextRoot)
+      // Return payload
+      return { payload: unmasked.payload, nextRoot: unmasked.next_root }
+    } catch (e) {
+      console.error('failed to parse: ', e)
+    }
+  }
+}
+
 const listen = (channel, callback) => {
   var root = channel.root
   return setTimeout(async () => {
@@ -152,7 +170,7 @@ const listen = (channel, callback) => {
   }, channel.timeout)
 }
 
-// Sync requests
+// Parse bundles and
 const txHashesToMessages = async hashes => {
   let bundles = {}
 
@@ -226,6 +244,7 @@ module.exports = {
   create: create,
   decode: decode,
   fetch: fetch,
+  fetchSingle: fetchSingle,
   attach: attach,
   listen: listen,
   getRoot: getRoot,
