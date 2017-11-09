@@ -6,7 +6,11 @@ var iota = new IOTA({ provider: `http://p103.iotaledger.net:14700/` })
 var mamState = Mam.init(iota)
 
 // Set channel mode
-mamState = Mam.changeMode(mamState, 'private')
+mamState = Mam.changeMode(
+  mamState,
+  'restricted',
+  'IREALLYENJOYPOTATORELATEDPRODUCTS'
+)
 
 // Publish to tangle
 const publish = async packet => {
@@ -20,7 +24,12 @@ const publish = async packet => {
   await Mam.attach(message.payload, message.address)
 
   // Fetch Stream Async to Test
-  var resp = await Mam.fetch(message.root, 'private', null, console.log)
+  var resp = await Mam.fetch(
+    message.root,
+    'restricted',
+    'IREALLYENJOYPOTATORELATEDPRODUCTS',
+    console.log
+  )
   console.log(resp)
 }
 

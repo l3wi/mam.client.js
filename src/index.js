@@ -18,10 +18,9 @@ const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
   // Set IOTA object
   iota = externalIOTA
   // Setup Personal Channel
-  var channelSeed = Encryption.hash(Crypto.converter.trits(seed.slice()))
-  var channelKey = Crypto.converter.trytes(channelSeed.slice())
   var channel = {
     side_key: null,
+    mode: 'public',
     next_root: null,
     security: security,
     start: 0,
@@ -53,19 +52,26 @@ const subscribe = (state, channelRoot, channelKey = null) => {
   }
   return state
 }
+
+const changeMode = (state, mode, sidekey) => {
+  if (mode !== 'public' && mode !== 'private' && mode !== 'restricted')
+    return console.log('Did not recognise mode!')
+  if (mode === 'restricted' && !sidekey)
+    return console.log('You must specify a side key for a restricted channel')
+  if (sidekey) state.channel.side_key = sidekey
+  state.channel.mode = mode
+  return state
+}
+
 /**
  * cretae 
  * @param  {object} state
  * @param  {sting} message // Tryte encoded string
  */
-const create = (state, message, sidekey) => {
+const create = (state, message) => {
   var channel = state.channel
-  let mam = Mam.createMessage(
-    state.seed,
-    message,
-    sidekey || channel.side_key,
-    channel
-  )
+  // Interact with MAM Lib
+  let mam = Mam.createMessage(state.seed, message, channel.side_key, channel)
   // If the tree is exhausted.
   if (channel.index == channel.count - 1) {
     // change start to begining of next tree.
@@ -76,12 +82,25 @@ const create = (state, message, sidekey) => {
     //Else step the tree.
     channel.index++
   }
+
+  // Advance Channel
   channel.next_root = mam.next_root
   state.channel = channel
+
+  // Generate attachement address
+  let address
+  if (channel.mode !== 'public') {
+    address = Crypto.converter.trytes(
+      Encryption.hash(Crypto.converter.trits(mam.root.slice()))
+    )
+  } else {
+    address = mam.root
+  }
   return {
     state,
     payload: mam.payload,
-    root: mam.root
+    root: mam.root,
+    address: address
   }
 }
 
@@ -94,7 +113,7 @@ const decode = (payload, side_key, root) => {
   return mam
 }
 
-const fetch = async (address, sidekey, callback) => {
+const fetch = async (address, mode, sidekey, callback) => {
   let consumedAll = false
   if (!callback) var messages = []
   let nextRoot = address
@@ -103,9 +122,13 @@ const fetch = async (address, sidekey, callback) => {
   let messageCount = 0
 
   while (!consumedAll) {
-    console.log('Looking up data at: ', nextRoot)
+    // Apply channel mode
+    address = nextRoot
+    if (mode === 'private' || mode === 'restricted') address = hash(nextRoot)
+    // Fetching
+    console.log('Looking up data at: ', address)
     let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
-      addresses: [nextRoot]
+      addresses: [address]
     })
 
     if (hashes.length == 0) {
@@ -129,7 +152,7 @@ const fetch = async (address, sidekey, callback) => {
         }
         nextRoot = unmasked.next_root
       } catch (e) {
-        console.error('failed to parse: ', e)
+        return console.error('failed to parse: ', e)
       }
     }
   }
@@ -142,7 +165,9 @@ const fetch = async (address, sidekey, callback) => {
   return resp
 }
 
-const fetchSingle = async (address, sidekey) => {
+const fetchSingle = async (root, mode, sidekey) => {
+  let address = root
+  if (mode === 'private' || mode === 'restricted') address = hash(root)
   let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
     addresses: [address]
   })
@@ -151,7 +176,7 @@ const fetchSingle = async (address, sidekey) => {
   for (let message of messagesGen) {
     try {
       // Unmask the message
-      let unmasked = decode(message, sidekey, address)
+      let unmasked = decode(message, sidekey, root)
       // Return payload
       return { payload: unmasked.payload, nextRoot: unmasked.next_root }
     } catch (e) {
@@ -222,6 +247,12 @@ const attach = async (trytes, root) => {
   }
 }
 
+// Helpers
+const hash = data => {
+  return Crypto.converter.trytes(
+    Encryption.hash(Crypto.converter.trits(data.slice())).slice()
+  )
+}
 const isClient =
   typeof window !== 'undefined' &&
   window.document &&
@@ -236,11 +267,13 @@ const keyGen = length => {
   }
   return result.join('')
 }
+
 const setupEnv = IOTA => (Mam = IOTA)
 
 module.exports = {
   init: init,
   subscribe: subscribe,
+  changeMode: changeMode,
   create: create,
   decode: decode,
   fetch: fetch,

@@ -12,7 +12,7 @@ var mamState = Mam.init(iota)
 const publish = async packet => {
   var message = Mam.create(mamState, packet)
   mamState = message.state
-  await Mam.attach(message.payload, message.root)
+  await Mam.attach(message.payload, message.address)
   return message.root
 }
 
@@ -24,7 +24,7 @@ const execute = async () => {
 
   ///////////////////////////////////
   // Fetch the messages syncronously
-  var resp = await Mam.fetch(root)
+  var resp = await Mam.fetch(root, 'public')
   console.log(resp)
 }
 
