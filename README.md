@@ -28,7 +28,25 @@ Mam.init(iota, seed, security)
 
 1. **iota**: `Object` Initialised IOTA library with a provider set.
 2. **seed**: `String` Tryte-encoded seed. *Null value generates a random seed*
-3. **security**: `Integer` Security of the keys used. *Null value default to `2`*
+3. **security**: `Integer` Security of the keys used. *Null value defaults to `2`*
+
+#### Return
+
+1. **Object** - Initialised state object to be used in future actions
+
+### `changeMode`
+
+This takes the state object and changes the default stream mode from `public` to the specified mode and `sidekey`. There are only three possible modes: `public`, `private`, & `restricted`. If you fail to pass one of these modes it will default to `public`. This will return a state object that tracks the progress of your stream and streams you are following
+
+#### Input
+
+```
+Mam.changeMode(state, mode, sidekey)
+```
+
+1. **state**: `Object` Initialised IOTA library with a provider set.
+2. **mode**: `String` Intended channel mode. Can be only: `public`, `private` or `restricted`
+3. **sideKey**: `String` Tryte-encoded encryption key, any length. *Required for restricted mode*
 
 #### Return
 
@@ -43,24 +61,24 @@ Creates a MAM message payload from a state object, tryte-encoded message and an 
 #### Input
 
 ```
-Mam.create(state, message, sideKey)
+Mam.create(state, message)
 ```
 
 1. **state**: `Object` Initialised IOTA library with a provider set.
 2. **message**: `String` Tryte-encoded payload to be encrypted.
-3. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
 
 #### Return
 
 1. **state**: `Object` Updated state object to be used with future actions/
 2. **payload**: `String` Tryte-encoded payload.
-3. **root**: `String` Tryte-encoded root used as an address to attach the payload.
+3. **root**: `String` Tryte-encoded root of the payload.
+4. **address**: `String` Tryte-encoded address used as an location to attach the payload.
 
 ------
 
 ### `decode`
 
-Enables a user to decode a 
+Enables a user to decode a payload
 
 #### Input
 
@@ -92,11 +110,11 @@ Attaches a payload to the tangle
 #### Input
 
 ```
-await Mam.attach(payload, root)
+await Mam.attach(payload, address)
 ```
 
 1. **payload**: `String` Tryte-encoded payload to be attached to the tsangle.
-2. **root**: `String` Tryte-encoded string returned from the `Mam.create()` function.
+2. **address**: `String` Tryte-encoded string returned from the `Mam.create()` function.
 
 #### Return
 
@@ -113,12 +131,13 @@ See examples: `fetchSync.js` & `fetchAsync.js` usage examples.
 #### Input
 
 ```
-await Mam.fetch(root, sidekey, callback)
+await Mam.fetch(root, mode, sidekey, callback)
 ```
 
-1. **root**: `String` Tryte-encoded string used as the entry point to a stream.
-2. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
-3. **callback**: `Function` Tryte-encoded encryption key. *Null value will cause the function*
+1. **root**: `String` Tryte-encoded string used as the entry point to a stream. *NOT the address!*
+2. **mode**: `String` Stream mode. Can be only: `public`, `private` or `restricted` *Null value falls back to public*
+3. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
+4. **callback**: `Function` Tryte-encoded encryption key. *Null value will cause the function*
 
 #### Return
 
@@ -135,7 +154,7 @@ This repo provides wrappers for both Browser and Node environments. The build sc
 
 The below command will build two files: `iota-bindings-emscripten.wasm` & `mam.web.js`. These need to be included in the browser (**in the above order**). 
 
-Additionally, due to quirks in the `rust-wasm-loader` you will need to adjust the `webpack.config.js` file and change the `output` variable to match how your project will serve the file to the browser. Once loaded it will bind to the window as `Mam`.
+Additionally, due to quirks in the `rust-wasm-loader` you will need to pass the `--env.path` variable to match how your project will serve the file in the browser. Once loaded it will bind to the window as `Mam`.
 
 ```javascript
 // Install dependencies
@@ -158,5 +177,6 @@ git submodule update --init --recursive
 // Build for node
 yarn node
 ```
+
 
 

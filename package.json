@@ -6,7 +6,8 @@
   "scripts": {
     "web": "webpack --progress --colors --watch",
     "node": "webpack --progress --colors --watch --env node",
-    "build": "webpack --progress --colors --env node && webpack --progress --colors",
+    "build":
+      "webpack --progress --colors --env node && webpack --progress --colors",
     "test":
       "mocha --compilers js:babel-core/register --colors ./test/*.spec.js",
     "test:watch":
