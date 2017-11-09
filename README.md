@@ -34,6 +34,8 @@ Mam.init(iota, seed, security)
 
 1. **Object** - Initialised state object to be used in future actions
 
+------
+
 ### `changeMode`
 
 This takes the state object and changes the default stream mode from `public` to the specified mode and `sidekey`. There are only three possible modes: `public`, `private`, & `restricted`. If you fail to pass one of these modes it will default to `public`. This will return a state object that tracks the progress of your stream and streams you are following
