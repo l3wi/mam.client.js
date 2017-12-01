@@ -53,6 +53,10 @@ const subscribe = (state, channelRoot, channelKey = null) => {
   return state
 }
 
+const setIOTA = (externalIOTA) => {
+  iota = externalIOTA
+}
+
 const changeMode = (state, mode, sidekey) => {
   if (mode !== 'public' && mode !== 'private' && mode !== 'restricted')
     return console.log('Did not recognise mode!')
@@ -64,7 +68,7 @@ const changeMode = (state, mode, sidekey) => {
 }
 
 /**
- * cretae 
+ * cretae
  * @param  {object} state
  * @param  {sting} message // Tryte encoded string
  */
@@ -281,5 +285,6 @@ module.exports = {
   attach: attach,
   listen: listen,
   getRoot: getRoot,
-  setupEnv: setupEnv
+  setupEnv: setupEnv,
+  setIOTA: setIOTA
 }
