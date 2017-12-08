@@ -64,7 +64,7 @@ const changeMode = (state, mode, sidekey) => {
 }
 
 /**
- * cretae 
+ * create 
  * @param  {object} state
  * @param  {sting} message // Tryte encoded string
  */
@@ -126,7 +126,6 @@ const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
     address = nextRoot
     if (mode === 'private' || mode === 'restricted') address = hash(nextRoot, rounds)
     // Fetching
-    console.log('Looking up data at: ', address)
     let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
       addresses: [address]
     })
@@ -157,8 +156,6 @@ const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
     }
   }
 
-  console.log('Total transaction count: ', transactionCount)
-
   let resp = {}
   resp.nextRoot = nextRoot
   if (!callback) resp.messages = messages
@@ -188,7 +185,6 @@ const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
 const listen = (channel, callback) => {
   var root = channel.root
   return setTimeout(async () => {
-    console.log('Fetching')
     var resp = await fetch(root)
     root = resp.nextRoot
     callback(resp.messages)
@@ -224,7 +220,7 @@ const txHashesToMessages = async hashes => {
     .filter(item => item !== undefined)
 }
 
-const attach = async (trytes, root) => {
+const attach = async (trytes, root, depth = 6, mwm = 14) => {
   var transfers = [
     {
       address: root,
@@ -236,11 +232,10 @@ const attach = async (trytes, root) => {
   try {
     let objs = await pify(iota.api.sendTransfer.bind(iota.api))(
       keyGen(81),
-      5,
-      9,
+      depth,
+      mwm,
       transfers
     )
-    console.log('Message attached')
     return objs
   } catch (e) {
     return console.error('failed to attach message:', '\n', e)
