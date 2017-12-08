@@ -19,8 +19,8 @@ function increment(subseed, count) {
   return subseed
 }
 
-function hash(...keys) {
-  const curl = new Crypto.curl()
+function hash(rounds, ...keys) {
+  const curl = new Crypto.curl(rounds)
   const key = new Int32Array(243)
   curl.initialize()
   keys.map(k => curl.absorb(k, 0, k.length))

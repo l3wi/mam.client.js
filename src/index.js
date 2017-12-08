@@ -91,7 +91,7 @@ const create = (state, message) => {
   let address
   if (channel.mode !== 'public') {
     address = Crypto.converter.trytes(
-      Encryption.hash(Crypto.converter.trits(mam.root.slice()))
+      Encryption.hash(81, Crypto.converter.trits(mam.root.slice()))
     )
   } else {
     address = mam.root
@@ -113,7 +113,7 @@ const decode = (payload, side_key, root) => {
   return mam
 }
 
-const fetch = async (address, mode, sidekey, callback) => {
+const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
   let consumedAll = false
   if (!callback) var messages = []
   let nextRoot = address
@@ -124,7 +124,7 @@ const fetch = async (address, mode, sidekey, callback) => {
   while (!consumedAll) {
     // Apply channel mode
     address = nextRoot
-    if (mode === 'private' || mode === 'restricted') address = hash(nextRoot)
+    if (mode === 'private' || mode === 'restricted') address = hash(nextRoot, rounds)
     // Fetching
     console.log('Looking up data at: ', address)
     let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
@@ -165,9 +165,9 @@ const fetch = async (address, mode, sidekey, callback) => {
   return resp
 }
 
-const fetchSingle = async (root, mode, sidekey) => {
+const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
   let address = root
-  if (mode === 'private' || mode === 'restricted') address = hash(root)
+  if (mode === 'private' || mode === 'restricted') address = hash(root, rounds)
   let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
     addresses: [address]
   })
@@ -248,9 +248,9 @@ const attach = async (trytes, root) => {
 }
 
 // Helpers
-const hash = data => {
+const hash = (data, rounds) => {
   return Crypto.converter.trytes(
-    Encryption.hash(Crypto.converter.trits(data.slice())).slice()
+    Encryption.hash(rounds || 81, Crypto.converter.trits(data.slice())).slice()
   )
 }
 const isClient =
