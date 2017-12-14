@@ -2,7 +2,7 @@
   "name": "mam.client.js",
   "private": false,
   "version": "0.0.1",
-  "main": "lib/library.js",
+  "main": "src/node.js",
   "scripts": {
     "web": "webpack --progress --colors --watch",
     "node": "webpack --progress --colors --watch --env node",

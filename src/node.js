@@ -1,4 +1,4 @@
-const IOTA = require('../iota-bindings/emscripten/src/main.rs')
+const IOTA = require('./IOTA.js')
 
 var Main = require('./index.js')
 //////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-const wasm = require('../iota-bindings/emscripten/src/main.rs')
+const wasm = require('./IOTA.js')
 wasm.initialize({ noExitRuntime: true }).then(IOTA => {
   var Main = require('./index.js')
   //////////////////////////////////////////////////////////////////
