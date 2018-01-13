@@ -37,15 +37,15 @@ function encrypt(message, key, salt) {
   }
   const length = message.length * 3
   const outTrits = new Int32Array(length)
-  const intermedaiteKey = new Int32Array(curl.HASH_LENGTH)
+  const intermediateKey = new Int32Array(curl.HASH_LENGTH)
   return message
     .match(/.{1,81}/g)
     .map(m => {
-      curl.squeeze(intermedaiteKey, 0, curl.HASH_LENGTH)
+      curl.squeeze(intermediateKey, 0, curl.HASH_LENGTH)
       const out = Crypto.converter.trytes(
         Crypto.converter
           .trits(m)
-          .map((t, i) => trinarySum(t, intermedaiteKey[i]))
+          .map((t, i) => trinarySum(t, intermediateKey[i]))
       )
       return out
     })
@@ -62,15 +62,15 @@ function decrypt(message, key, salt) {
   const messageTrits = Crypto.converter.trits(message)
   const length = messageTrits.length
   const plainTrits = new Int32Array(length)
-  const intermedaiteKey = new Int32Array(curl.HASH_LENGTH)
+  const intermediateKey = new Int32Array(curl.HASH_LENGTH)
   return message
     .match(/.{1,81}/g)
     .map(m => {
-      curl.squeeze(intermedaiteKey, 0, curl.HASH_LENGTH)
+      curl.squeeze(intermediateKey, 0, curl.HASH_LENGTH)
       const out = Crypto.converter.trytes(
         Crypto.converter
           .trits(m)
-          .map((t, i) => trinarySum(t, -intermedaiteKey[i]))
+          .map((t, i) => trinarySum(t, -intermediateKey[i]))
       )
       return out
     })
