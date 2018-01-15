@@ -64,7 +64,7 @@ const changeMode = (state, mode, sidekey) => {
 }
 
 /**
- * create 
+ * create
  * @param  {object} state
  * @param  {sting} message // Tryte encoded string
  */
@@ -238,7 +238,8 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
     )
     return objs
   } catch (e) {
-    return console.error('failed to attach message:', '\n', e)
+    console.error('failed to attach message:', '\n', e)
+    return e
   }
 }
 
