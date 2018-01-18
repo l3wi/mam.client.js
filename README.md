@@ -1,8 +1,8 @@
 # MAM Client JS Library React native version
 
-Note: this uses rn-nodeify to add the node libraries for react native that are required by this library.
-      Make sure that you import './shim' in your Main app javascript at the top of the file.
+Note: When using with React-Native use the rn-nodify package to shim the library to ensure it works correctly
 
+To import the library, use either require("mam.client.js") or import * as Mam from 'mam.client.js'
 
 
 It is possible to publish transactions to the Tangle that contain only messages, with no value. This introduces many possibilities for data integrity and communication, but comes with the caveat that message-only signatures are not checked. What we introduce is a method of symmetric-key encrypted, signed data that takes advantage of merkle-tree winternitz signatures for extended public key usability, that can be found trivially by those who know to look for it.
