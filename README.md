@@ -1,8 +1,5 @@
-# MAM Client JS Library React native version
+# MAM Client JS Library
 
-Note: When using with React-Native use the rn-nodify package to shim the library to ensure it works correctly
-
-To import the library, use either require("mam.client.js") or import * as Mam from 'mam.client.js'
 
 
 It is possible to publish transactions to the Tangle that contain only messages, with no value. This introduces many possibilities for data integrity and communication, but comes with the caveat that message-only signatures are not checked. What we introduce is a method of symmetric-key encrypted, signed data that takes advantage of merkle-tree winternitz signatures for extended public key usability, that can be found trivially by those who know to look for it.
@@ -16,6 +13,10 @@ This is wrapper library for the WASM/ASM.js output of the [IOTA Bindings reposit
 After downloading the appropriate file for your project, `mam.node.js` or `mam.web.js`, importing the library will provide access to the functions described below. 
 
 For a simple user experience you are advised to call the `init()` function to enable to tracking of state in your channels.When calling `init()` you should also pass in your initialised IOTA library.  This will provide access to some extra functionality including attaching, fetching and subscribing.
+
+
+Note: When using with React-Native use the rn-nodify package to shim the library to ensure it works correctly
+To import the library, use either require("mam.client.js") or import * as Mam from 'mam.client.js'
 
 > *Please see example/index.js for a working example*
 
