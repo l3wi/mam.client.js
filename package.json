@@ -6,6 +6,7 @@
   "scripts": {
     "web": "webpack --progress --colors --watch",
     "node": "webpack --progress --colors --watch --env node",
+    "postinstall": "rn-nodeify --install fs,crypto,vm,process,path,stream,console --hack",
     "build":
       "webpack --progress --colors --env node && webpack --progress --colors",
     "test":
@@ -17,6 +18,8 @@
     "babel-polyfill": "^6.26.0",
     "iota.crypto.js": "iotaledger/iota.crypto.js",
     "iota.lib.js": "^0.4.2",
+    "asyncstorage-down": "^3.0.0",
+    "rn-nodeify": "^8.3.0",
     "pify": "^3.0.0",
     "rust-wasm-loader": "^0.1.2"
   },
