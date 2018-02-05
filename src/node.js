@@ -217,14 +217,13 @@ function decodeMessage(PAYLOAD, SIDE_KEY, ROOT) {
     let parse_result = iota_mam_parse(PAYLOAD_trits, SIDE_KEY_trits, ROOT_trits)
     let unmasked_payload_ctrits = IOTA.getValue(parse_result, 'i32')
     let unmasked_payload = ctrits_trits_to_string(unmasked_payload_ctrits)
-    iota_ctrits_drop(unmasked_payload_ctrits)
 
     let unmasked_next_root_ctrits = IOTA.getValue(parse_result + 4, 'i32')
     let unmasked_next_root = ctrits_trits_to_string(unmasked_next_root_ctrits)
     ;[
-        PAYLOAD,
-        SIDE_KEY,
-        ROOT,
+        PAYLOAD_trits,
+        SIDE_KEY_trits,
+        ROOT_trits,
         unmasked_payload_ctrits,
         unmasked_next_root_ctrits
     ].forEach(iota_ctrits_drop)
