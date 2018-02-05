@@ -168,7 +168,6 @@ wasm.initialize({ noExitRuntime: true }).then(IOTA => {
         let root_siblings = iota_merkle_siblings(root_branch)
 
         let next_root_branch = iota_merkle_branch(next_root_merkle, INDEX)
-        let next_root_siblings = iota_merkle_siblings(next_root_branch)
 
         let root = iota_merkle_slice(root_merkle)
         let next_root = iota_merkle_slice(next_root_merkle)
@@ -197,9 +196,15 @@ wasm.initialize({ noExitRuntime: true }).then(IOTA => {
         iota_merkle_branch_drop(next_root_branch)
         iota_merkle_drop(root_merkle)
         iota_merkle_drop(next_root_merkle)
-        ;[SEED_trits, MESSAGE_trits, SIDE_KEY_trits, root, next_root].forEach(
-            iota_ctrits_drop
-        )
+        ;[
+            SEED_trits,
+            MESSAGE_trits,
+            SIDE_KEY_trits,
+            root,
+            next_root,
+            masked_payload,
+            root_siblings
+        ].forEach(iota_ctrits_drop)
         return response
     }
 
@@ -218,13 +223,18 @@ wasm.initialize({ noExitRuntime: true }).then(IOTA => {
         )
         let unmasked_payload_ctrits = IOTA.getValue(parse_result, 'i32')
         let unmasked_payload = ctrits_trits_to_string(unmasked_payload_ctrits)
-        iota_ctrits_drop(unmasked_payload_ctrits)
 
         let unmasked_next_root_ctrits = IOTA.getValue(parse_result + 4, 'i32')
         let unmasked_next_root = ctrits_trits_to_string(
             unmasked_next_root_ctrits
         )
-        iota_ctrits_drop(unmasked_next_root_ctrits)
+        ;[
+            PAYLOAD_trits,
+            SIDE_KEY_trits,
+            ROOT_trits,
+            unmasked_payload_ctrits,
+            unmasked_next_root_ctrits
+        ].forEach(iota_ctrits_drop)
         IOTA._free(parse_result)
         return { payload: unmasked_payload, next_root: unmasked_next_root }
     }
