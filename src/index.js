@@ -275,7 +275,7 @@ const keyGen = length => {
     return result.join('')
 }
 
-const setupEnv = IOTA => (Mam = IOTA)
+const setupEnv = rustBindings => (Mam = rustBindings)
 
 module.exports = {
     init: init,

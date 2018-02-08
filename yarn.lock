@@ -2876,6 +2876,10 @@ vm-browserify@0.0.4:
   dependencies:
     indexof "0.0.1"
 
+wasm-loader@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/wasm-loader/-/wasm-loader-1.1.0.tgz#33d07f7cd1b45854170cf1216880de783725a589"
+
 watchpack@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/watchpack/-/watchpack-1.4.0.tgz#4a1472bcbb952bd0a9bb4036801f954dfb39faac"
