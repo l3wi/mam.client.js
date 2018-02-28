@@ -66,6 +66,11 @@ wasm.initialize({ noExitRuntime: true }).then(IOTA => {
         'number',
         'number'
     ])
+    // (key, root) -> address
+    const iota_mam_id = IOTA.cwrap('iota_mam_id', 'number', [
+        'number',
+        'number'
+    ])
     // (encoded_message, key, root, index) -> message
     const iota_mam_parse = IOTA.cwrap('iota_mam_parse', 'number', [
         'number',
@@ -136,6 +141,16 @@ wasm.initialize({ noExitRuntime: true }).then(IOTA => {
             CHANNEL.security
         )
         return ctrits_trits_to_string(iota_merkle_slice(root_merkle))
+    }
+
+    function getMamAddress(KEY, ROOT) {
+        let KEY_trits = string_to_ctrits_trits(KEY)
+        let ROOT_trits = string_to_ctrits_trits(ROOT)
+        let address = iota_merkle_id(
+            SEED_trits,
+            ROOT_trits
+        )
+        return ctrits_trits_to_string(address)
     }
 
     function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
@@ -241,6 +256,7 @@ wasm.initialize({ noExitRuntime: true }).then(IOTA => {
     var Mam = {
         decodeMessage: decodeMessage,
         createMessage: createMessage,
+        getMamAddress: getMamAddress,
         getMamRoot: getMamRoot
     }
     // Feed Mam functions into the main file
