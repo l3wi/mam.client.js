@@ -54,6 +54,12 @@ const iota_ctrits_ctrits_byte_length = IOTA.cwrap(
     ['number']
 )
 
+// (key, root) -> address
+const iota_mam_id = IOTA.cwrap('iota_mam_id', 'number', [
+    'number',
+    'number'
+])
+
 // (seed, message, key, root, siblings, next_root, start, index, security) -> encoded_message
 const iota_mam_create = IOTA.cwrap('iota_mam_create', 'number', [
     'number',
@@ -134,6 +140,16 @@ function getMamRoot(SEED, CHANNEL) {
         CHANNEL.security
     )
     return ctrits_trits_to_string(iota_merkle_slice(root_merkle))
+}
+
+function getMamAddress(KEY, ROOT) {
+    let KEY_trits = string_to_ctrits_trits(KEY)
+    let ROOT_trits = string_to_ctrits_trits(ROOT)
+    let address = iota_merkle_id(
+        SEED_trits,
+        ROOT_trits
+    )
+    return ctrits_trits_to_string(address)
 }
 
 function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
@@ -233,6 +249,7 @@ function decodeMessage(PAYLOAD, SIDE_KEY, ROOT) {
 var Mam = {
     decodeMessage: decodeMessage,
     createMessage: createMessage,
+    getMamAddress: getMamAddress,
     getMamRoot: getMamRoot
 }
 // Feed Mam functions into the main file

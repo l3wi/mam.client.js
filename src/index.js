@@ -2,7 +2,6 @@
 require('babel-polyfill')
 const crypto = require('crypto')
 const Crypto = require('iota.crypto.js')
-const Encryption = require('./encryption')
 const pify = require('pify')
 // Setup Provider
 var iota = {}
@@ -92,9 +91,7 @@ const create = (state, message) => {
     // Generate attachement address
     let address
     if (channel.mode !== 'public') {
-        address = Crypto.converter.trytes(
-            Encryption.hash(81, Crypto.converter.trits(mam.root.slice()))
-        )
+        address = Mam.getMamAddress(channel.side_key, mam.root.slice())
     } else {
         address = mam.root
     }
@@ -127,7 +124,7 @@ const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
         // Apply channel mode
         address = nextRoot
         if (mode === 'private' || mode === 'restricted')
-            address = hash(nextRoot, rounds)
+            address = Mam.getMamAddress(sideKey, nextRoot)
         // Fetching
         let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
             addresses: [address]
@@ -168,7 +165,7 @@ const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
 const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
     let address = root
     if (mode === 'private' || mode === 'restricted')
-        address = hash(root, rounds)
+        address = Mam.getMamAddress(sidekey, root)
     let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
         addresses: [address]
     })
@@ -252,14 +249,6 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
 }
 
 // Helpers
-const hash = (data, rounds) => {
-    return Crypto.converter.trytes(
-        Encryption.hash(
-            rounds || 81,
-            Crypto.converter.trits(data.slice())
-        ).slice()
-    )
-}
 const isClient =
     typeof window !== 'undefined' &&
     window.document &&
