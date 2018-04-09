@@ -1,17 +1,17 @@
-var Mam = require('../lib/mam.node.js')
-var IOTA = require('iota.lib.js')
-var iota = new IOTA({ provider: `https://testnet140.tangle.works` })
+const Mam = require('../lib/mam.client.js')
+const IOTA = require('iota.lib.js')
+const iota = new IOTA({ provider: `https://testnet140.tangle.works` })
 
 // Init State
 let root = ''
 
 // Initialise MAM State
-var mamState = Mam.init(iota)
+let mamState = Mam.init(iota)
 
 // Publish to tangle
 const publish = async packet => {
-    var trytes = iota.utils.toTrytes(JSON.stringify(packet))
-    var message = Mam.create(mamState, trytes)
+    const trytes = iota.utils.toTrytes(JSON.stringify(packet))
+    const message = Mam.create(mamState, trytes)
     mamState = message.state
     await Mam.attach(message.payload, message.address)
     return message.root
@@ -26,7 +26,7 @@ const execute = async () => {
     // Publish but not save root
     await publish('POTATOTWO')
     // Callback used to pass data + returns next_root
-    var resp = await Mam.fetch(root, 'public', null, logData)
+    const resp = await Mam.fetch(root, 'public', null, logData)
     console.log(resp)
 }
 

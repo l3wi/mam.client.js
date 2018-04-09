@@ -1,16 +1,16 @@
-var Mam = require('../lib/mam.node.js')
-var IOTA = require('iota.lib.js')
-var iota = new IOTA({ provider: `https://testnet140.tangle.works` })
+const Mam = require('../lib/mam.client.js')
+const IOTA = require('iota.lib.js')
+const iota = new IOTA({ provider: `https://testnet140.tangle.works` })
 
 // Init State
 let root = ''
 
 // Initialise MAM State
-var mamState = Mam.init(iota)
+let mamState = Mam.init(iota)
 
 // Publish to tangle
 const publish = async packet => {
-    var message = Mam.create(mamState, packet)
+    const message = Mam.create(mamState, packet)
     mamState = message.state
     await Mam.attach(message.payload, message.address)
     return message.root
@@ -24,7 +24,7 @@ const execute = async () => {
 
     ///////////////////////////////////
     // Fetch the messages syncronously
-    var resp = await Mam.fetch(root, 'public')
+    const resp = await Mam.fetch(root, 'public')
     console.log(resp)
 }
 

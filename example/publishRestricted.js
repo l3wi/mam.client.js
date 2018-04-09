@@ -1,9 +1,9 @@
-var Mam = require('../lib/mam.node.js')
-var IOTA = require('iota.lib.js')
-var iota = new IOTA({ provider: `https://testnet140.tangle.works` })
+const Mam = require('../lib/mam.client.js')
+const IOTA = require('iota.lib.js')
+const iota = new IOTA({ provider: `https://testnet140.tangle.works` })
 
 // Initialise MAM State
-var mamState = Mam.init(iota)
+let mamState = Mam.init(iota)
 
 // Set channel mode
 mamState = Mam.changeMode(
@@ -15,7 +15,7 @@ mamState = Mam.changeMode(
 // Publish to tangle
 const publish = async packet => {
     // Create MAM Payload - STRING OF TRYTES
-    var message = Mam.create(mamState, packet)
+    const message = Mam.create(mamState, packet)
     // Save new mamState
     mamState = message.state
     console.log('Root: ', message.root)
@@ -24,7 +24,7 @@ const publish = async packet => {
     await Mam.attach(message.payload, message.address)
 
     // Fetch Stream Async to Test
-    var resp = await Mam.fetch(
+    const resp = await Mam.fetch(
         message.root,
         'restricted',
         'IREALLYENJOYPOTATORELATEDPRODUCTS',

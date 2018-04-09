@@ -1,6 +1,5 @@
-const IOTA = require('../iota-bindings/emscripten/src/main.rs')
-
-var Main = require('./index.js')
+const IOTA = require('./IOTA.js')
+const Main = require('./index.js')
 //////////////////////////////////////////////////////////////////
 /* ======= CTrits bindings ======= */
 const TritEncoding = {
@@ -54,7 +53,6 @@ const iota_ctrits_ctrits_byte_length = IOTA.cwrap(
     ['number']
 )
 
-// (key, root) -> address
 const iota_mam_id = IOTA.cwrap('iota_mam_id', 'number', [
     'number',
     'number'
@@ -131,7 +129,7 @@ const ctrits_trits_to_string = ctrits => {
     return out
 }
 
-function getMamRoot(SEED, CHANNEL) {
+const getMamRoot = (SEED, CHANNEL) => {
     let SEED_trits = string_to_ctrits_trits(SEED)
     let root_merkle = iota_merkle_create(
         SEED_trits,
@@ -142,19 +140,20 @@ function getMamRoot(SEED, CHANNEL) {
     return ctrits_trits_to_string(iota_merkle_slice(root_merkle))
 }
 
-function getMamAddress(KEY, ROOT) {
+const getMamAddress = (KEY, ROOT) => {
     let KEY_trits = string_to_ctrits_trits(KEY)
     let ROOT_trits = string_to_ctrits_trits(ROOT)
-    let address = iota_merkle_id(
-        SEED_trits,
+    let address = iota_mam_id(
+        KEY_trits,
         ROOT_trits
     )
     return ctrits_trits_to_string(address)
 }
 
-function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
+const createMessage = (SEED, MESSAGE, SIDE_KEY, CHANNEL) => {
     if (!SIDE_KEY)
         SIDE_KEY = `999999999999999999999999999999999999999999999999999999999999999999999999999999999`
+
     // MAM settings
     let SEED_trits = string_to_ctrits_trits(SEED)
     let MESSAGE_trits = string_to_ctrits_trits(MESSAGE)
@@ -166,7 +165,6 @@ function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
     const NEXT_START = START + COUNT
     const NEXT_COUNT = CHANNEL.next_count
     const INDEX = CHANNEL.index
-
     const HASH_LENGTH = 81
 
     // set up merkle tree
@@ -198,7 +196,7 @@ function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
         SECURITY
     )
 
-    let response = {
+    const response = {
         payload: ctrits_trits_to_string(masked_payload),
         root: ctrits_trits_to_string(root),
         next_root: ctrits_trits_to_string(next_root),
@@ -222,7 +220,7 @@ function createMessage(SEED, MESSAGE, SIDE_KEY, CHANNEL) {
     return response
 }
 
-function decodeMessage(PAYLOAD, SIDE_KEY, ROOT) {
+const decodeMessage = (PAYLOAD, SIDE_KEY, ROOT) => {
     if (!SIDE_KEY)
         SIDE_KEY = `999999999999999999999999999999999999999999999999999999999999999999999999999999999`
 
@@ -246,13 +244,16 @@ function decodeMessage(PAYLOAD, SIDE_KEY, ROOT) {
     IOTA._free(parse_result)
     return { payload: unmasked_payload, next_root: unmasked_next_root }
 }
-var Mam = {
-    decodeMessage: decodeMessage,
-    createMessage: createMessage,
-    getMamAddress: getMamAddress,
-    getMamRoot: getMamRoot
+
+const Mam = {
+    decodeMessage,
+    createMessage,
+    getMamAddress,
+    getMamRoot
 }
+
 // Feed Mam functions into the main file
 Main.setupEnv(Mam)
-// Export to window
+
+// Export
 module.exports = Main

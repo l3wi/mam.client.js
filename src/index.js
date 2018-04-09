@@ -2,10 +2,12 @@
 require('babel-polyfill')
 const crypto = require('crypto')
 const Crypto = require('iota.crypto.js')
+const Encryption = require('./encryption')
 const pify = require('pify')
+
 // Setup Provider
-var iota = {}
-var Mam = {}
+let iota = {}
+let Mam = {}
 
 /**
  * Initialisation function which returns a state object
@@ -16,23 +18,23 @@ var Mam = {}
 const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
     // Set IOTA object
     iota = externalIOTA
+
     // Setup Personal Channel
-    var channel = {
+    const channel = {
         side_key: null,
         mode: 'public',
         next_root: null,
-        security: security,
+        security,
         start: 0,
         count: 1,
         next_count: 1,
         index: 0
     }
-    // Setup Subs
-    const subscribed = []
+
     return {
-        subscribed: subscribed,
-        channel: channel,
-        seed: seed
+        subscribed: [],
+        channel,
+        seed
     }
 }
 /**
@@ -43,7 +45,7 @@ const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
  */
 const subscribe = (state, channelRoot, channelKey = null) => {
     state.subscribed[channelRoot] = {
-        channelKey: channelKey,
+        channelKey,
         timeout: 5000,
         root: channelRoot,
         next_root: null,
@@ -53,13 +55,17 @@ const subscribe = (state, channelRoot, channelKey = null) => {
 }
 
 const changeMode = (state, mode, sidekey) => {
-    if (mode !== 'public' && mode !== 'private' && mode !== 'restricted')
+    if (mode !== 'public' && mode !== 'private' && mode !== 'restricted') {
         return console.log('Did not recognise mode!')
-    if (mode === 'restricted' && !sidekey)
+    }
+    if (mode === 'restricted' && !sidekey) {
         return console.log(
             'You must specify a side key for a restricted channel'
         )
-    if (sidekey) state.channel.side_key = sidekey
+    }
+    if (sidekey) {
+      state.channel.side_key = sidekey
+    }
     state.channel.mode = mode
     return state
 }
@@ -70,17 +76,18 @@ const changeMode = (state, mode, sidekey) => {
  * @param  {sting} message // Tryte encoded string
  */
 const create = (state, message) => {
-    var channel = state.channel
+    const channel = state.channel
     // Interact with MAM Lib
-    let mam = Mam.createMessage(state.seed, message, channel.side_key, channel)
+    const mam = Mam.createMessage(state.seed, message, channel.side_key, channel)
+
     // If the tree is exhausted.
-    if (channel.index == channel.count - 1) {
+    if (channel.index === channel.count - 1) {
         // change start to begining of next tree.
         channel.start = channel.next_count + channel.start
         // Reset index.
         channel.index = 0
     } else {
-        //Else step the tree.
+        // Else step the tree.
         channel.index++
     }
 
@@ -91,42 +98,45 @@ const create = (state, message) => {
     // Generate attachement address
     let address
     if (channel.mode !== 'public') {
-        address = Mam.getMamAddress(channel.side_key, mam.root.slice())
+        address = Crypto.converter.trytes(
+            Encryption.hash(81, Crypto.converter.trits(mam.root.slice()))
+        )
     } else {
         address = mam.root
     }
+
     return {
         state,
         payload: mam.payload,
         root: mam.root,
-        address: address
+        address
     }
 }
 
 // Current root
-const getRoot = state => {
-    return Mam.getMamRoot(state.seed, state.channel)
-}
+const getRoot = state => Mam.getMamRoot(state.seed, state.channel)
+
 const decode = (payload, side_key, root) => {
-    let mam = Mam.decodeMessage(payload, side_key, root)
+    const mam = Mam.decodeMessage(payload, side_key, root)
     return mam
 }
 
-const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
+const fetch = async (root, mode, sidekey, callback, rounds = 81) => {
+    const messages = []
     let consumedAll = false
-    if (!callback) var messages = []
-    let nextRoot = address
-
+    let nextRoot = root
     let transactionCount = 0
     let messageCount = 0
 
     while (!consumedAll) {
         // Apply channel mode
-        address = nextRoot
-        if (mode === 'private' || mode === 'restricted')
-            address = Mam.getMamAddress(sideKey, nextRoot)
+        let address = nextRoot
+        if (mode === 'private' || mode === 'restricted') {
+            address = hash(nextRoot, rounds)
+        }
+
         // Fetching
-        let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
+        const hashes = await pify(iota.api.findTransactions.bind(iota.api)) ({
             addresses: [address]
         })
 
@@ -138,45 +148,48 @@ const fetch = async (address, mode, sidekey, callback, rounds = 81) => {
         transactionCount += hashes.length
         messageCount++
 
-        let messagesGen = await txHashesToMessages(hashes)
+        const messagesGen = await txHashesToMessages(hashes)
         for (let message of messagesGen) {
             try {
                 // Unmask the message
-                let unmasked = decode(message, sidekey, nextRoot)
+                const { payload, next_root } = decode(message, sidekey, nextRoot)
                 // Push payload into the messages array
                 if (!callback) {
-                    messages.push(unmasked.payload)
+                    messages.push(payload)
                 } else {
-                    callback(unmasked.payload)
+                    callback(payload)
                 }
-                nextRoot = unmasked.next_root
+                nextRoot = next_root
             } catch (e) {
                 return console.error('failed to parse: ', e)
             }
         }
     }
 
-    let resp = {}
+    const resp = {}
     resp.nextRoot = nextRoot
-    if (!callback) resp.messages = messages
+    if (!callback) {
+      resp.messages = messages
+    }
     return resp
 }
 
 const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
     let address = root
-    if (mode === 'private' || mode === 'restricted')
-        address = Mam.getMamAddress(sidekey, root)
-    let hashes = await pify(iota.api.findTransactions.bind(iota.api))({
+    if (mode === 'private' || mode === 'restricted') {
+        address = hash(root, rounds)
+    }
+    const hashes = await pify(iota.api.findTransactions.bind(iota.api)) ({
         addresses: [address]
     })
 
-    let messagesGen = await txHashesToMessages(hashes)
+    const messagesGen = await txHashesToMessages(hashes)
     for (let message of messagesGen) {
         try {
             // Unmask the message
-            let unmasked = decode(message, sidekey, root)
+            const { payload, next_root } = decode(message, sidekey, root)
             // Return payload
-            return { payload: unmasked.payload, nextRoot: unmasked.next_root }
+            return { payload, nextRoot: next_root }
         } catch (e) {
             console.error('failed to parse: ', e)
         }
@@ -184,9 +197,9 @@ const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
 }
 
 const listen = (channel, callback) => {
-    var root = channel.root
+    let root = channel.root
     return setTimeout(async () => {
-        var resp = await fetch(root)
+        let resp = await fetch(root)
         root = resp.nextRoot
         callback(resp.messages)
     }, channel.timeout)
@@ -194,13 +207,13 @@ const listen = (channel, callback) => {
 
 // Parse bundles and
 const txHashesToMessages = async hashes => {
-    let bundles = {}
+    const bundles = {}
 
-    let processTx = txo => {
-        let bundle = txo.bundle
-        let msg = txo.signatureMessageFragment
-        let idx = txo.currentIndex
-        let maxIdx = txo.lastIndex
+    const processTx = txo => {
+        const bundle = txo.bundle
+        const msg = txo.signatureMessageFragment
+        const idx = txo.currentIndex
+        const maxIdx = txo.lastIndex
 
         if (bundle in bundles) {
             bundles[bundle].push([idx, msg])
@@ -217,7 +230,7 @@ const txHashesToMessages = async hashes => {
         }
     }
 
-    let objs = await pify(iota.api.getTransactionsObjects.bind(iota.api))(
+    const objs = await pify(iota.api.getTransactionsObjects.bind(iota.api)) (
         hashes
     )
     return objs
@@ -226,7 +239,7 @@ const txHashesToMessages = async hashes => {
 }
 
 const attach = async (trytes, root, depth = 6, mwm = 14) => {
-    var transfers = [
+    const transfers = [
         {
             address: root,
             value: 0,
@@ -235,7 +248,7 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
     ]
     // if (isClient) curl.overrideAttachToTangle(iota)
     try {
-        let objs = await pify(iota.api.sendTransfer.bind(iota.api))(
+        const objs = await pify(iota.api.sendTransfer.bind(iota.api)) (
             keyGen(81),
             depth,
             mwm,
@@ -249,33 +262,43 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
 }
 
 // Helpers
+const hash = (data, rounds) => {
+    return Crypto.converter.trytes(
+        Encryption.hash(
+            rounds || 81,
+            Crypto.converter.trits(data.slice())
+        ).slice()
+    )
+}
+
 const isClient =
     typeof window !== 'undefined' &&
     window.document &&
     window.document.createElement
 
 const keyGen = length => {
-    var charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9'
-    var values = crypto.randomBytes(length)
-    var result = new Array(length)
-    for (var i = 0; i < length; i++) {
-        result[i] = charset[values[i] % charset.length]
-    }
-    return result.join('')
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9'
+    const values = crypto.randomBytes(length)
+    return Array.from(
+      new Array(length), (x, i) => charset[values[i] % charset.length]
+    ).join('')
 }
 
-const setupEnv = IOTA => (Mam = IOTA)
+const setupEnv = rustBindings => (Mam = rustBindings)
+
+const setIOTA = (externalIOTA = {}) => (iota = externalIOTA)
 
 module.exports = {
-    init: init,
-    subscribe: subscribe,
-    changeMode: changeMode,
-    create: create,
-    decode: decode,
-    fetch: fetch,
-    fetchSingle: fetchSingle,
-    attach: attach,
-    listen: listen,
-    getRoot: getRoot,
-    setupEnv: setupEnv
+    init,
+    subscribe,
+    changeMode,
+    create,
+    decode,
+    fetch,
+    fetchSingle,
+    attach,
+    listen,
+    getRoot,
+    setIOTA,
+    setupEnv
 }
