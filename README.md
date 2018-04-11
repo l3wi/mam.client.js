@@ -152,11 +152,11 @@ await Mam.fetch(root, mode, sidekey, callback)
 1. **nextRoot**: `String` Tryte-encoded string pointing to the next root.
 2. **messages**: `Array` Array of Tryte-encoded messages from the stream. *NOTE: This is only returned when the call is **not** using a callback*
 
-## Building the library
+## Building the client library
 
 Compiled binaries are included in the repository. Compiling the Rust bindings can require some complex environmental setup to get to work, so if you are unfamiliar just stick to the compiled files.
 
-### Building
+### Frameworks & Node
 
 The below command will build a file called `mam.client.js` in the `lib/` directory.
 
@@ -167,3 +167,82 @@ yarn
 // Build
 yarn build
 ```
+
+
+### Browser	only
+
+The below command will build `mam.web.js` in the `lib/` directory, that can be included in the browser.
+
+```javascript
+ // Install dependencies
+ yarn
+
+ // Build
+ yarn web
+```
+
+#### Usage
+
+You can use the browser version like this
+```
+  <script src="mam.web.js"></script>
+  <script type="text/javascript">
+      var Mam = require('mam.web.js');
+  </script>
+```
+
+
+
+## Building `IOTA.js`
+
+1. Install Rust
+
+```
+curl https://sh.rustup.rs -sSf | sh
+```
+See https://www.rustup.rs/
+
+2. Update to `nightly`
+
+```
+rustup default nightly
+rustup update
+```
+
+3. Install `Emscripten`
+
+```
+cd
+# Get the emsdk repo
+git clone https://github.com/juj/emsdk.git
+
+# Enter that directory
+cd emsdk
+
+# Fetch the latest registry of available tools.
+./emsdk update
+
+# Download and install the latest SDK tools.
+./emsdk install latest
+
+# Make the "latest" SDK "active" for the current user. (writes ~/.emscripten file)
+./emsdk activate latest
+
+# Activate PATH and other environment variables in the current terminal
+source ./emsdk_env.sh
+```
+
+See https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html
+
+
+4. Clone latest `iota-bindings` Repo, then compile content of the `emscripten` to `IOTA.js`
+```
+git clone git@github.com:iotaledger/iota-bindings.git
+cd iota-bindings/emscripten
+rustup target install asmjs-unknown-emscripten
+cargo build --release --target asmjs-unknown-emscripten
+```
+
+5. Navigate to `iota-bindings/emscripten/target/asmjs-unknown-emscripten/release` and look for `IOTA.js`
+
+6. Add `module.exports = Module;` at the very end of `IOTA.js` file
