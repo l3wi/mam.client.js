@@ -5,10 +5,12 @@
     "main": "src/node.js",
     "scripts": {
         "node": "webpack --progress --colors --watch --env node",
+        "web": "browserify -r ./src/node.js:mam.web.js > ./lib/mam.web.js",
         "build": "webpack"
     },
     "dependencies": {
         "babel-polyfill": "^6.26.0",
+        "browserify": "^16.1.1",
         "iota.crypto.js": "iotaledger/iota.crypto.js",
         "iota.lib.js": "^0.4.2",
         "pify": "^3.0.0"
