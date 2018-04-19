@@ -8,6 +8,9 @@
         "web": "browserify -r ./src/node.js:mam.web.js > ./lib/mam.web.js",
         "build": "webpack"
     },
+    "engines": {
+        "node": ">=6"
+    },
     "dependencies": {
         "babel-polyfill": "^6.26.0",
         "browserify": "^16.1.1",
