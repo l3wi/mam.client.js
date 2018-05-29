@@ -14,6 +14,14 @@ For a simple user experience you are advised to call the `init()` function to en
 
 > *Please see example/index.js for a working example*
 
+## Install
+
+To build the project yourself, please see the [Building the library](#building-the-library) section.
+
+```bash
+yarn add mam.client.js
+```
+
 ## Basic Usage
 
 ### `init`
