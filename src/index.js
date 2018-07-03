@@ -278,10 +278,14 @@ const isClient =
 
 const keyGen = length => {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9'
-    const values = crypto.randomBytes(length)
-    return Array.from(
-      new Array(length), (x, i) => charset[values[i] % charset.length]
-    ).join('')
+    let key = '';
+    while (key.length < 81) {
+        const byte = crypto.randomBytes(1)
+        if (byte[0] < 243) {
+            key += charset.charAt(byte[0] % 27);
+        }
+    }
+    return key;
 }
 
 const setupEnv = rustBindings => (Mam = rustBindings)
