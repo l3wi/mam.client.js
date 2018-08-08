@@ -15,7 +15,7 @@
         "babel-polyfill": "^6.26.0",
         "browserify": "^16.1.1",
         "iota.crypto.js": "iotaledger/iota.crypto.js",
-        "iota.lib.js": "^0.4.2",
+        "iota.lib.js": "^0.4.7",
         "pify": "^3.0.0"
     },
     "devDependencies": {
