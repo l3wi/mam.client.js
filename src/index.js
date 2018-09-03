@@ -256,8 +256,7 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
         )
         return objs
     } catch (e) {
-        console.error('failed to attach message:', '\n', e)
-        return e
+       	throw `failed to attach message: ${e}`
     }
 }
 
