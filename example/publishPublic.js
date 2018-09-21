@@ -1,24 +1,28 @@
 const Mam = require('../lib/mam.client.js')
-const IOTA = require('iota.lib.js')
-const iota = new IOTA({ provider: `https://testnet140.tangle.works` })
+const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
 
 // Initialise MAM State - PUBLIC
-let mamState = Mam.init(iota)
+let mamState = Mam.init('https://testnet140.tangle.works')
+
+// Callback used to pass data out of the fetch
+const logData = data => console.log(JSON.parse(trytesToAscii(data)))
 
 // Publish to tangle
 const publish = async packet => {
     // Create MAM Payload - STRING OF TRYTES
-    const message = Mam.create(mamState, packet)
+    const trytes = asciiToTrytes(JSON.stringify(packet))
+    const message = Mam.create(mamState, trytes)
     // Save new mamState
     mamState = message.state
     // Attach the payload.
-    console.log('Root: ', message.root)
-    console.log('Address: ', message.address)
     await Mam.attach(message.payload, message.address)
 
     // Fetch Stream Async to Test
-    const resp = await Mam.fetch(message.root, 'public', null, console.log)
-    console.log(resp)
+    const resp = await Mam.fetch(message.root, 'public', null, logData)
+
+    console.log(resp, message.root)
 }
 
-publish('POTATO')
+publish('POTATO ONE')
+publish('POTATO TWO')
+publish('POTATO THREE')
