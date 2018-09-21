@@ -1,12 +1,13 @@
 /// Deps
 require('babel-polyfill')
 const crypto = require('crypto')
-const Crypto = require('iota.crypto.js')
 const Encryption = require('./encryption')
 const pify = require('pify')
+const converter = require('@iota/converter');
+const { composeAPI, createPrepareTransfers } = require('@iota/core')
 
 // Setup Provider
-let iota = {}
+let provider = null;
 let Mam = {}
 
 /**
@@ -15,9 +16,9 @@ let Mam = {}
  * @param  {string} seed
  * @param  {integer} security
  */
-const init = (externalIOTA = {}, seed = keyGen(81), security = 2) => {
-    // Set IOTA object
-    iota = externalIOTA
+const init = (externalProvider, seed = keyGen(81), security = 2) => {
+    // Set IOTA provider
+    provider = externalProvider
 
     // Setup Personal Channel
     const channel = {
@@ -98,8 +99,8 @@ const create = (state, message) => {
     // Generate attachement address
     let address
     if (channel.mode !== 'public') {
-        address = Crypto.converter.trytes(
-            Encryption.hash(81, Crypto.converter.trits(mam.root.slice()))
+        address = converter.trytes(
+            Encryption.hash(81, converter.trits(mam.root.slice()))
         )
     } else {
         address = mam.root
@@ -136,7 +137,8 @@ const fetch = async (root, mode, sidekey, callback, rounds = 81) => {
         }
 
         // Fetching
-        const hashes = await pify(iota.api.findTransactions.bind(iota.api)) ({
+        const { findTransactions } = composeAPI({ provider })
+        const hashes = await pify(findTransactions) ({
             addresses: [address]
         })
 
@@ -179,7 +181,8 @@ const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
     if (mode === 'private' || mode === 'restricted') {
         address = hash(root, rounds)
     }
-    const hashes = await pify(iota.api.findTransactions.bind(iota.api)) ({
+    const { findTransactions } = composeAPI({ provider })
+    const hashes = await pify(findTransactions) ({
         addresses: [address]
     })
 
@@ -229,8 +232,8 @@ const txHashesToMessages = async hashes => {
                 .reduce((acc, n) => acc + n[1], '')
         }
     }
-
-    const objs = await pify(iota.api.getTransactionsObjects.bind(iota.api)) (
+    const { getTransactionObjects } = composeAPI({ provider })
+    const objs = await pify(getTransactionObjects) (
         hashes
     )
     return objs
@@ -246,15 +249,23 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
             message: trytes
         }
     ]
-    // if (isClient) curl.overrideAttachToTangle(iota)
     try {
-        const objs = await pify(iota.api.sendTransfer.bind(iota.api)) (
-            keyGen(81),
-            depth,
-            mwm,
-            transfers
-        )
-        return objs
+        const { sendTrytes } = composeAPI({ provider })
+        const prepareTransfers = createPrepareTransfers()
+
+        prepareTransfers(keyGen(81), transfers, {})
+          .then(async trytes => {
+            await sendTrytes(trytes, depth, mwm)
+                .then(transactions => transactions)
+                .catch(error => {
+                  console.log('error sendTrytes', error);
+                  throw `sendTrytes failed: ${error}`
+                })
+          })
+          .catch(error => {
+            console.log('error prepareTransfers', error);
+            throw `failed to attach message: ${error}`
+          });
     } catch (e) {
        	throw `failed to attach message: ${e}`
     }
@@ -262,10 +273,10 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
 
 // Helpers
 const hash = (data, rounds) => {
-    return Crypto.converter.trytes(
+    return converter.trytes(
         Encryption.hash(
             rounds || 81,
-            Crypto.converter.trits(data.slice())
+            converter.trits(data.slice())
         ).slice()
     )
 }
@@ -289,7 +300,7 @@ const keyGen = length => {
 
 const setupEnv = rustBindings => (Mam = rustBindings)
 
-const setIOTA = (externalIOTA = {}) => (iota = externalIOTA)
+const setIOTA = (externalProvider = null) => (provider = externalProvider)
 
 module.exports = {
     init,
