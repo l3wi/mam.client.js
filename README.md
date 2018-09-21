@@ -24,15 +24,15 @@ To import the library, use either require("mam.client.js") or import * as Mam fr
 
 ### `init`
 
-This initialises the state and binds the `iota.lib.js` to the library. This will return a state object that tracks the progress of your stream and streams you are following
+This initialises the state. This will return a state object that tracks the progress of your stream and streams you are following
 
 #### Input
 
 ```
-Mam.init(iota, seed, security)
+Mam.init(provider, seed, security)
 ```
 
-1. **iota**: `Object` Initialised IOTA library with a provider set.
+1. **provider**: `String` Network provider.
 2. **seed**: `String` Tryte-encoded seed. *Null value generates a random seed*
 3. **security**: `Integer` Security of the keys used. *Null value defaults to `2`*
 
