@@ -1,5 +1,5 @@
-import Curl from '@iota/curl'
-import converter from '@iota/converter';
+const Curl = require('@iota/curl').default
+const converter = require('@iota/converter')
 
 function trinarySum(a, b) {
     const result = a + b

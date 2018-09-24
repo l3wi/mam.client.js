@@ -253,17 +253,15 @@ const attach = async (trytes, root, depth = 6, mwm = 14) => {
         const { sendTrytes } = composeAPI({ provider })
         const prepareTransfers = createPrepareTransfers()
 
-        prepareTransfers(keyGen(81), transfers, {})
+        prepareTransfers('9'.repeat(81), transfers, {})
           .then(async trytes => {
             await sendTrytes(trytes, depth, mwm)
                 .then(transactions => transactions)
                 .catch(error => {
-                  console.log('error sendTrytes', error);
                   throw `sendTrytes failed: ${error}`
                 })
           })
           .catch(error => {
-            console.log('error prepareTransfers', error);
             throw `failed to attach message: ${error}`
           });
     } catch (e) {
