@@ -1,7 +1,7 @@
 {
     "name": "mam.client.js",
     "private": false,
-    "version": "0.0.3",
+    "version": "0.0.4",
     "main": "lib/mam.client.js",
     "scripts": {
         "node": "webpack --progress --colors --watch --env node",
@@ -13,10 +13,11 @@
         "node": ">=6"
     },
     "dependencies": {
+        "@iota/converter": "^1.0.0-beta.5",
+        "@iota/core": "^1.0.0-beta.5",
+        "@iota/curl": "^1.0.0-beta.5",
         "babel-polyfill": "^6.26.0",
         "browserify": "^16.1.1",
-        "iota.crypto.js": "iotaledger/iota.crypto.js",
-        "iota.lib.js": "^0.4.7",
         "pify": "^3.0.0"
     },
     "devDependencies": {

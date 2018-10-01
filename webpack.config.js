@@ -39,5 +39,4 @@ const config = {
         path: 'empty'
     }
 }
-console.log(config.output)
 module.exports = config
