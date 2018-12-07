@@ -2,7 +2,7 @@ const Mam = require('../lib/mam.client.js')
 const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
 
 // Initialise MAM State - PUBLIC
-let mamState = Mam.init('https://testnet140.tangle.works')
+let mamState = Mam.init('https://nodes.devnet.thetangle.org:443')
 
 // Callback used to pass data out of the fetch
 const logData = data => console.log(JSON.parse(trytesToAscii(data)))

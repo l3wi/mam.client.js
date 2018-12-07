@@ -5,7 +5,7 @@ const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
 let root = ''
 
 // Initialise MAM State
-let mamState = Mam.init('https://testnet140.tangle.works')
+let mamState = Mam.init('https://nodes.devnet.thetangle.org:443')
 
 // Publish to tangle
 const publish = async packet => {

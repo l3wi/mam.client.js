@@ -2,7 +2,7 @@ const Mam = require('../lib/mam.client.js')
 const { asciiToTrytes, trytesToAscii } = require('@iota/converter')
 
 // Initialise MAM State
-let mamState = Mam.init('https://testnet140.tangle.works')
+let mamState = Mam.init('https://nodes.devnet.thetangle.org:443')
 
 const type = 'private'
 
