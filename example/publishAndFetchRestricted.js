@@ -53,6 +53,13 @@ const logData = data => console.log('Fetched and parsed', JSON.parse(trytesToAsc
 
 publishAll()
   .then(async root => {
+
+    // Output asyncronously using "logData" callback function
     await Mam.fetch(root, mode, secretKey, logData)
+
+    // Output syncronously once fetch is completed
+    const result = await Mam.fetch(root, mode, secretKey)
+    result.messages.forEach(message => console.log('Fetched and parsed', JSON.parse(trytesToAscii(message)), '\n'))
+
     console.log(`Verify with MAM Explorer:\n${mamExplorerLink}${root}\n`);
   })
