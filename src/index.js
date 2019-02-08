@@ -133,7 +133,7 @@ const fetch = async (root, selectedMode, sidekey, callback) => {
 
     try {
         do {
-            let reader = new Reader(ctx, client, mode, nextRoot, sidekey)
+            let reader = new Reader(ctx, client, mode, nextRoot, sidekey || '')
             const message = await reader.next()
             hasMessage = message && message.value && message.value[0]
             if (hasMessage) {

@@ -51,7 +51,7 @@ publishAll()
   .then(async root => {
 
     // Output asyncronously using "logData" callback function
-    await Mam.fetch(root, mode, '', logData)
+    await Mam.fetch(root, mode, null, logData)
 
     // Output syncronously once fetch is completed
     const result = await Mam.fetch(root, mode)
