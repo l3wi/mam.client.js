@@ -48,7 +48,7 @@ Mam.changeMode(state, mode, sidekey)
 
 1. **state**: `Object` Initialised IOTA library with a provider set.
 2. **mode**: `String` Intended channel mode. Can be only: `public`, `private` or `restricted`
-3. **sideKey**: `String` Tryte-encoded encryption key, any length. *Required for restricted mode*
+3. **sideKey**: `String` Tryte-encoded encryption key, `81 trytes` long. *Required for restricted mode*
 
 #### Return
 
