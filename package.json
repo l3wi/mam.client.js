@@ -1,13 +1,12 @@
 {
     "name": "mam.client.js",
     "private": false,
-    "version": "0.1.0",
+    "version": "0.1.1",
     "main": "lib/mam.client.js",
     "scripts": {
-        "node": "webpack --progress --colors --watch --env node",
-        "web": "browserify -r ./src/node.js:mam.web.js > ./lib/mam.web.js",
+        "web": "browserify -r ./src/node.js:mam.web.js > ./web/mam.web.js",
         "build": "webpack",
-        "compress": "uglifyjs lib/mam.client.js -c -m -o lib/mam.client.min.js & uglifyjs lib/mam.web.js -c -m -o lib/mam.web.min.js"
+        "compress": "uglifyjs lib/mam.client.js -c -m -o lib/mam.client.min.js"
     },
     "engines": {
         "node": ">=6"
