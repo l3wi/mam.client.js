@@ -78,7 +78,7 @@ Mam.create(state, message)
 
 #### Return
 
-1. **state**: `Object` Updated state object to be used with future actions/
+1. **state**: `Object` Updated state object to be used with future actions.
 2. **payload**: `String` Tryte-encoded payload.
 3. **root**: `String` Tryte-encoded root of the payload.
 4. **address**: `String` Tryte-encoded address used as an location to attach the payload.
@@ -95,7 +95,7 @@ Enables a user to decode a payload
 Mam.decode(payload, sideKey, root)
 ```
 
-1. **payload**: `Object` Initialised IOTA library with a provider set.
+1. **payload**: `String` Tryte-encoded payload.
 2. **sideKey**: `String` Tryte-encoded encryption key. *Null value falls back to default key*
 3. **root**: `String` Tryte-encoded string used as the address to attach the payload.
 
@@ -114,7 +114,7 @@ These actions require an initialised IOTA library with a provider to be passed i
 
 ### `attach` - async
 
-Attaches a payload to the tangle
+Attaches a payload to the Tangle
 
 #### Input
 
@@ -122,7 +122,7 @@ Attaches a payload to the tangle
 await Mam.attach(payload, address, depth, minWeightMagnitude)
 ```
 
-1. **payload**: `String` Tryte-encoded payload to be attached to the tangle.
+1. **payload**: `String` Tryte-encoded payload to be attached to the Tangle.
 2. **address**: `String` Tryte-encoded string returned from the `Mam.create()` function.
 3. **depth**: `number` Optional depth at which Random Walk starts. A value of 3 is typically used by wallets, meaning that RW starts 3 milestones back. *Null value will set depth to 3*
 4. **minWeightMagnitude**: `number` Optional minimum number of trailing zeros in transaction hash. This is used by `attachToTangle` function to search for a valid nonce. Currently is 14 on mainnet & spamnnet and 9 on most other devnets. *Null value will set minWeightMagnitude to 9*
@@ -136,8 +136,6 @@ await Mam.attach(payload, address, depth, minWeightMagnitude)
 ### `fetch` - async
 
 Fetches the stream sequentially from a known `root` and optional `sidekey`. This call can be used in two ways: **Without a callback** will cause the function to read the entire stream before returning. **With a callback** the application will return data through the callback and finally the `nextroot` when finished.
-
-See examples: `fetchSync.js` & `fetchAsync.js` usage examples.
 
 #### Input
 
@@ -172,4 +170,15 @@ The below command will build a file called `mam.client.js` in the `lib/` directo
 yarn
 // Build for node
 yarn build
+```
+
+### Browser
+
+The below command will build a file called `mam.web.js` in the `web/` directory.
+
+```javascript
+// Install dependencies
+yarn
+// Build for web
+yarn web
 ```
