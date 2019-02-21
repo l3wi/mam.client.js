@@ -151,31 +151,29 @@ const fetch = async (root, selectedMode, sidekey, callback) => {
         } while(!!hasMessage)
         return { messages, nextRoot }
     } catch (e) {
-        return console.error('failed to parse: ', e)
+        console.error('failed to parse: ', e)
         return e
     }
 }
 
-const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
-    let address = root
-    if (mode === 'private' || mode === 'restricted') {
-        address = hash(root, rounds)
-    }
-    const { findTransactions } = composeAPI({ provider })
-    const hashes = await findTransactions({
-        addresses: [address]
-    })
+const fetchSingle = async (root, selectedMode, sidekey) => {
+    let client = createHttpClient({ provider })
+    let ctx = await createContext()
+    const mode = selectedMode === 'public' ? Mode.Public : Mode.Old
+    let nextRoot = root
+    let payload
 
-    const messagesGen = await txHashesToMessages(hashes)
-    for (let message of messagesGen) {
-        try {
-            // Unmask the message
-            const { payload, next_root } = decode(message, sidekey, root)
-            // Return payload
-            return { payload, nextRoot: next_root }
-        } catch (e) {
-            console.error('failed to parse: ', e)
+    try {
+        let reader = new Reader(ctx, client, mode, nextRoot, sidekey || '')
+        const message = await reader.next()
+        if (message && message.value && message.value[0]) {
+            nextRoot = message.value[0].message.nextRoot
+            payload = message.value[0].message.payload
         }
+        return { payload, nextRoot }
+    } catch (e) {
+        console.error('failed to parse: ', e)
+        return e
     }
 }
 
@@ -186,39 +184,6 @@ const listen = (channel, callback) => {
         root = resp.nextRoot
         callback(resp.messages)
     }, channel.timeout)
-}
-
-// Parse bundles and
-const txHashesToMessages = async hashes => {
-    const bundles = {}
-
-    const processTx = txo => {
-        const bundle = txo.bundle
-        const msg = txo.signatureMessageFragment
-        const idx = txo.currentIndex
-        const maxIdx = txo.lastIndex
-
-        if (bundle in bundles) {
-            bundles[bundle].push([idx, msg])
-        } else {
-            bundles[bundle] = [[idx, msg]]
-        }
-
-        if (bundles[bundle].length == maxIdx + 1) {
-            let l = bundles[bundle]
-            delete bundles[bundle]
-            return l
-                .sort((a, b) => a[0] - b[0])
-                .reduce((acc, n) => acc + n[1], '')
-        }
-    }
-    const { getTransactionObjects } = composeAPI({ provider })
-    const objs = await getTransactionObjects(
-        hashes
-    )
-    return objs
-        .map(result => processTx(result))
-        .filter(item => item !== undefined)
 }
 
 const attach = async (trytes, root, depth = 3, mwm = 9) => {
@@ -238,16 +203,6 @@ const attach = async (trytes, root, depth = 3, mwm = 9) => {
     } catch (e) {
        	throw `failed to attach message: ${e}`
     }
-}
-
-// Helpers
-const hash = (data, rounds) => {
-    return converter.trytes(
-        Encryption.hash(
-            rounds || 81,
-            converter.trits(data.slice())
-        ).slice()
-    )
 }
 
 const keyGen = length => {
