@@ -123,13 +123,14 @@ const decode = (payload, sidekey, root) => {
     Mam.decodeMessage(payload, key, root)
 }
 
-const fetch = async (root, selectedMode, sidekey, callback) => {
+const fetch = async (root, selectedMode, sidekey, callback, limit) => {
     let client = createHttpClient({ provider })
     let ctx = await createContext()
     const messages = []
     const mode = selectedMode === 'public' ? Mode.Public : Mode.Old
     let hasMessage = false
     let nextRoot = root
+    let localLimit = !!limit ? limit : Number.MAX_SAFE_INTEGER;
 
     try {
         do {
@@ -148,7 +149,7 @@ const fetch = async (root, selectedMode, sidekey, callback) => {
                     callback(payload)
                 }
             }
-        } while(!!hasMessage)
+        } while(!!hasMessage && messages.length < localLimit)
         return { messages, nextRoot }
     } catch (e) {
         console.error('failed to parse: ', e)
@@ -157,24 +158,11 @@ const fetch = async (root, selectedMode, sidekey, callback) => {
 }
 
 const fetchSingle = async (root, selectedMode, sidekey) => {
-    let client = createHttpClient({ provider })
-    let ctx = await createContext()
-    const mode = selectedMode === 'public' ? Mode.Public : Mode.Old
-    let nextRoot = root
-    let payload
-
-    try {
-        let reader = new Reader(ctx, client, mode, nextRoot, sidekey || '')
-        const message = await reader.next()
-        if (message && message.value && message.value[0]) {
-            nextRoot = message.value[0].message.nextRoot
-            payload = message.value[0].message.payload
-        }
-        return { payload, nextRoot }
-    } catch (e) {
-        console.error('failed to parse: ', e)
-        return e
-    }
+    const response = await fetch(root, selectedMode, sidekey, undefined, 1);
+    return response && response.nextRoot ? {
+        payload: response.messages && response.messages.length === 1 ? response.messages[0] : undefined,
+        nextRoot: response.nextRoot
+    } : response;
 }
 
 const listen = (channel, callback) => {
