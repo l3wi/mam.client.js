@@ -130,7 +130,7 @@ const fetch = async (root, selectedMode, sidekey, callback, limit) => {
     const mode = selectedMode === 'public' ? Mode.Public : Mode.Old
     let hasMessage = false
     let nextRoot = root
-    let localLimit = limit || Number.MAX_SAFE_INTEGER;
+    let localLimit = limit || Math.pow(2, 53) - 1;
 
     try {
         do {
