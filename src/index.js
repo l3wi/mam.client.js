@@ -158,11 +158,11 @@ const fetch = async (root, selectedMode, sidekey, callback, limit) => {
 }
 
 const fetchSingle = async (root, selectedMode, sidekey) => {
-    const response = await fetch(root, selectedMode, sidekey, undefined, 1);
+    const response = await fetch(root, selectedMode, sidekey, undefined, 1)
     return response && response.nextRoot ? {
         payload: response.messages && response.messages.length === 1 ? response.messages[0] : undefined,
         nextRoot: response.nextRoot
-    } : response;
+    } : response
 }
 
 const listen = (channel, callback) => {
