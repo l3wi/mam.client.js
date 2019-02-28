@@ -4,7 +4,7 @@
     "version": "0.1.1",
     "main": "lib/mam.client.js",
     "scripts": {
-        "web": "browserify -r ./src/node.js:mam.web.js > ./web/mam.web.js",
+        "web": "browserify -r ./src/node.js:mam.web.js -s Mam > ./web/mam.web.js",
         "build": "webpack",
         "compress": "uglifyjs lib/mam.client.js -c -m -o lib/mam.client.min.js"
     },
