@@ -1,4 +1,4 @@
-require=(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Mam = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (process,global,Buffer){
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -95847,13 +95847,14 @@ const decode = (payload, sidekey, root) => {
     Mam.decodeMessage(payload, key, root)
 }
 
-const fetch = async (root, selectedMode, sidekey, callback) => {
+const fetch = async (root, selectedMode, sidekey, callback, limit) => {
     let client = createHttpClient({ provider })
     let ctx = await createContext()
     const messages = []
     const mode = selectedMode === 'public' ? Mode.Public : Mode.Old
     let hasMessage = false
     let nextRoot = root
+    let localLimit = limit || Math.pow(2, 53) - 1;
 
     try {
         do {
@@ -95872,35 +95873,20 @@ const fetch = async (root, selectedMode, sidekey, callback) => {
                     callback(payload)
                 }
             }
-        } while(!!hasMessage)
+        } while(!!hasMessage && messages.length < localLimit)
         return { messages, nextRoot }
     } catch (e) {
-        return console.error('failed to parse: ', e)
+        console.error('failed to parse: ', e)
         return e
     }
 }
 
-const fetchSingle = async (root, mode, sidekey, rounds = 81) => {
-    let address = root
-    if (mode === 'private' || mode === 'restricted') {
-        address = hash(root, rounds)
-    }
-    const { findTransactions } = composeAPI({ provider })
-    const hashes = await findTransactions({
-        addresses: [address]
-    })
-
-    const messagesGen = await txHashesToMessages(hashes)
-    for (let message of messagesGen) {
-        try {
-            // Unmask the message
-            const { payload, next_root } = decode(message, sidekey, root)
-            // Return payload
-            return { payload, nextRoot: next_root }
-        } catch (e) {
-            console.error('failed to parse: ', e)
-        }
-    }
+const fetchSingle = async (root, selectedMode, sidekey) => {
+    const response = await fetch(root, selectedMode, sidekey, undefined, 1)
+    return response && response.nextRoot ? {
+        payload: response.messages && response.messages.length === 1 ? response.messages[0] : undefined,
+        nextRoot: response.nextRoot
+    } : response
 }
 
 const listen = (channel, callback) => {
@@ -95912,45 +95898,13 @@ const listen = (channel, callback) => {
     }, channel.timeout)
 }
 
-// Parse bundles and
-const txHashesToMessages = async hashes => {
-    const bundles = {}
-
-    const processTx = txo => {
-        const bundle = txo.bundle
-        const msg = txo.signatureMessageFragment
-        const idx = txo.currentIndex
-        const maxIdx = txo.lastIndex
-
-        if (bundle in bundles) {
-            bundles[bundle].push([idx, msg])
-        } else {
-            bundles[bundle] = [[idx, msg]]
-        }
-
-        if (bundles[bundle].length == maxIdx + 1) {
-            let l = bundles[bundle]
-            delete bundles[bundle]
-            return l
-                .sort((a, b) => a[0] - b[0])
-                .reduce((acc, n) => acc + n[1], '')
-        }
-    }
-    const { getTransactionObjects } = composeAPI({ provider })
-    const objs = await getTransactionObjects(
-        hashes
-    )
-    return objs
-        .map(result => processTx(result))
-        .filter(item => item !== undefined)
-}
-
-const attach = async (trytes, root, depth = 3, mwm = 9) => {
+const attach = async (trytes, root, depth = 3, mwm = 9, tag = '') => {
     const transfers = [
         {
             address: root,
             value: 0,
-            message: trytes
+            message: trytes,
+            tag: tag
         }
     ]
     try {
@@ -95962,16 +95916,6 @@ const attach = async (trytes, root, depth = 3, mwm = 9) => {
     } catch (e) {
        	throw `failed to attach message: ${e}`
     }
-}
-
-// Helpers
-const hash = (data, rounds) => {
-    return converter.trytes(
-        Encryption.hash(
-            rounds || 81,
-            converter.trits(data.slice())
-        ).slice()
-    )
 }
 
 const keyGen = length => {
@@ -96266,4 +96210,5 @@ Main.setupEnv(Mam)
 // Export
 module.exports = Main
 
-},{"./IOTA.js":660,"./index.js":662}]},{},[]);
+},{"./IOTA.js":660,"./index.js":662}]},{},[])("mam.web.js")
+});
