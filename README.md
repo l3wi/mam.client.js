@@ -119,13 +119,14 @@ Attaches a payload to the Tangle
 #### Input
 
 ```
-await Mam.attach(payload, address, depth, minWeightMagnitude)
+await Mam.attach(payload, address, depth, minWeightMagnitude, tag)
 ```
 
 1. **payload**: `String` Tryte-encoded payload to be attached to the Tangle.
 2. **address**: `String` Tryte-encoded string returned from the `Mam.create()` function.
 3. **depth**: `number` Optional depth at which Random Walk starts. A value of 3 is typically used by wallets, meaning that RW starts 3 milestones back. *Null value will set depth to 3*
 4. **minWeightMagnitude**: `number` Optional minimum number of trailing zeros in transaction hash. This is used by `attachToTangle` function to search for a valid nonce. Currently is 14 on mainnet & spamnnet and 9 on most other devnets. *Null value will set minWeightMagnitude to 9*
+5. **tag**: `String` Optional tag of 0-27 trytes. *Null value will set tag to empty string*
 
 #### Return
 

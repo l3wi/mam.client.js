@@ -179,7 +179,8 @@ const attach = async (trytes, root, depth = 3, mwm = 9) => {
         {
             address: root,
             value: 0,
-            message: trytes
+            message: trytes,
+            tag: tag
         }
     ]
     try {
