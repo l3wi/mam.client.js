@@ -30,10 +30,13 @@ This initialises the state. This will return a state object that tracks the prog
 #### Input
 
 ```
-Mam.init(provider, seed, security)
+Mam.init(settings, seed, security)
 ```
 
-1. **provider**: `String` Network provider.
+1. **settings**: `Object` or `String` Configuration object or network provider URL.
+    Configuration object:
+    1.  **provider**: `String` Network provider URL.
+    2.  **attachToTangle** `Function` function to override default `attachToTangle` to use another Node to do the PoW or use a PoW service.
 2. **seed**: `String` Optional tryte-encoded seed. *Null value generates a random seed*
 3. **security**: `Integer` Optional security of the keys used. *Null value defaults to `2`*
 
