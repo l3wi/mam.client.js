@@ -12,15 +12,15 @@
         "node": ">=6"
     },
     "dependencies": {
-        "@iota/converter": "^1.0.0-beta.5",
-        "@iota/core": "^1.0.0-beta.5",
-        "@iota/curl": "^1.0.0-beta.5",
+        "@iota/converter": "^1.0.0-beta.11",
+        "@iota/core": "^1.0.0-beta.11",
+        "@iota/curl": "^1.0.0-beta.11",
         "babel-polyfill": "^6.26.0",
-        "browserify": "^16.1.1"
+        "browserify": "^16.2.3"
     },
     "devDependencies": {
         "babel-cli": "6.26.0",
-        "babel-core": "6.26.0",
+        "babel-core": "6.26.3",
         "babel-eslint": "8.0.1",
         "babel-loader": "7.1.2",
         "babel-plugin-add-module-exports": "0.2.1",
