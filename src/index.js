@@ -174,12 +174,13 @@ const listen = (channel, callback) => {
     }, channel.timeout)
 }
 
-const attach = async (trytes, root, depth = 3, mwm = 9) => {
+const attach = async (trytes, root, depth = 3, mwm = 9, tag = '') => {
     const transfers = [
         {
             address: root,
             value: 0,
-            message: trytes
+            message: trytes,
+            tag: tag
         }
     ]
     try {
