@@ -95733,17 +95733,31 @@ const { createContext, Reader, Mode } = require('../lib/mam')
 
 // Setup Provider
 let provider = null;
+let attachToTangle = null;
 let Mam = {}
 
 /**
  * Initialisation function which returns a state object
- * @param  {object} externalIOTA
- * @param  {string} seed
- * @param  {integer} security
+ * @param {object || string} settings object or external provider
+ * @param {string} [settings.provider] - Http `uri` of IRI node
+ * @param {Provider} [settings.network] - Network provider to override with
+ * @param {function} [settings.attachToTangle] - AttachToTangle function to override with
+ * @param {string} seed
+ * @param {integer} security
  */
-const init = (externalProvider, seed = keyGen(81), security = 2) => {
-    // Set IOTA provider
-    provider = externalProvider
+const init = (settings, seed = keyGen(81), security = 2) => {
+    if (typeof settings === 'object') {
+        // Set IOTA provider
+        provider = settings.provider
+
+        if (settings.attachToTangle) {
+            // Set alternative attachToTangle function
+            attachToTangle = settings.attachToTangle
+        }
+    } else {
+        // Set IOTA provider
+        provider = settings
+    }
 
     // Setup Personal Channel
     const channel = {
@@ -95848,13 +95862,13 @@ const decode = (payload, sidekey, root) => {
 }
 
 const fetch = async (root, selectedMode, sidekey, callback, limit) => {
-    let client = createHttpClient({ provider })
+    let client = createHttpClient({ provider, attachToTangle })
     let ctx = await createContext()
     const messages = []
     const mode = selectedMode === 'public' ? Mode.Public : Mode.Old
     let hasMessage = false
     let nextRoot = root
-    let localLimit = limit || Math.pow(2, 53) - 1;
+    let localLimit = limit || Math.pow(2, 53) - 1
 
     try {
         do {
@@ -95873,7 +95887,7 @@ const fetch = async (root, selectedMode, sidekey, callback, limit) => {
                     callback(payload)
                 }
             }
-        } while(!!hasMessage && messages.length < localLimit)
+        } while (!!hasMessage && messages.length < localLimit)
         return { messages, nextRoot }
     } catch (e) {
         console.error('failed to parse: ', e)
@@ -95908,11 +95922,11 @@ const attach = async (trytes, root, depth = 3, mwm = 9, tag = '') => {
         }
     ]
     try {
-        const { prepareTransfers, sendTrytes } = composeAPI({ provider })
+        const { prepareTransfers, sendTrytes } = composeAPI({ provider, attachToTangle })
 
         const trytes = await prepareTransfers('9'.repeat(81), transfers, {})
 
-        return sendTrytes(trytes, depth, mwm);
+        return sendTrytes(trytes, depth, mwm)
     } catch (e) {
        	throw `failed to attach message: ${e}`
     }
@@ -95920,14 +95934,14 @@ const attach = async (trytes, root, depth = 3, mwm = 9, tag = '') => {
 
 const keyGen = length => {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9'
-    let key = '';
+    let key = ''
     while (key.length < length) {
         let byte = crypto.randomBytes(1)
         if (byte[0] < 243) {
-            key += charset.charAt(byte[0] % 27);
+            key += charset.charAt(byte[0] % 27)
         }
     }
-    return key;
+    return key
 }
 
 const setupEnv = rustBindings => (Mam = rustBindings)
