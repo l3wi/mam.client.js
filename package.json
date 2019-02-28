@@ -1,7 +1,7 @@
 {
     "name": "mam.client.js",
     "private": false,
-    "version": "0.1.1",
+    "version": "0.1.2",
     "main": "lib/mam.client.js",
     "scripts": {
         "web": "browserify -r ./src/node.js:mam.web.js -s Mam > ./web/mam.web.js",
