@@ -1,7 +1,7 @@
 {
-    "name": "mam.client.js",
-    "private": false,
-    "version": "0.1.2",
+    "name": "@iota/mam",
+    "version": "0.6.0",
+    "description": "Masked Authentication Messaging wrapper for Javascript (Browser and Node)",
     "main": "lib/mam.client.js",
     "typings": "lib/mam.client.d.ts",
     "scripts": {
@@ -9,6 +9,21 @@
         "build": "webpack",
         "compress": "uglifyjs lib/mam.client.js -c -m -o lib/mam.client.min.js"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/iotaledger/mam.client.js.git"
+    },
+    "keywords": [
+        "IOTA",
+        "MAM",
+        "Masked Authentication Messaging"
+    ],
+    "author": "IOTA Foundation (https://iota.org)",
+    "license": "Apache-2.0",
+    "bugs": {
+        "url": "https://github.com/iotaledger/mam.client.js/issues"
+    },
+    "homepage": "https://iota.org",
     "engines": {
         "node": ">=6"
     },
