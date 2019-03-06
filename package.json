@@ -1,5 +1,5 @@
 {
-    "name": "@iota/mam",
+    "name": "mam.client.js",
     "version": "0.6.0",
     "description": "Masked Authentication Messaging wrapper for Javascript (Browser and Node)",
     "main": "lib/mam.client.js",
