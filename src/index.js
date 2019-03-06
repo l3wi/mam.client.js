@@ -1,5 +1,3 @@
-/// Deps
-require('babel-polyfill')
 const crypto = require('crypto')
 const Encryption = require('./encryption')
 const converter = require('@iota/converter')
@@ -20,6 +18,7 @@ let Mam = {}
  * @param {function} [settings.attachToTangle] - AttachToTangle function to override with
  * @param {string} seed
  * @param {integer} security
+ * @returns {object} State object to be used with future actions.
  */
 const init = (settings, seed = keyGen(81), security = 2) => {
     if (typeof settings === 'object') {
@@ -55,9 +54,10 @@ const init = (settings, seed = keyGen(81), security = 2) => {
 }
 /**
  * Add a subscription to your state object
- * @param  {object} state
- * @param  {string} channelRoot
- * @param  {string} channelKey
+ * @param {object} state The state object to add the subscription to.
+ * @param {string} channelRoot The root of the channel to subscribe to.
+ * @param {string} channelKey Optional, the key of the channel to subscribe to.
+ * @returns {object} Updated state object to be used with future actions.
  */
 const subscribe = (state, channelRoot, channelKey = null) => {
     state.subscribed[channelRoot] = {
@@ -70,7 +70,14 @@ const subscribe = (state, channelRoot, channelKey = null) => {
     return state
 }
 
-const changeMode = (state, mode, sidekey) => {
+/**
+ * Change the mode for the mam state
+ * @param {object} state 
+ * @param {string} mode [public/private/restricted]
+ * @param {string} sidekey, required for restricted mode
+ * @returns {object} Updated state object to be used with future actions.
+ */
+const changeMode = (state, mode, sidekey = null) => {
     if (mode !== 'public' && mode !== 'private' && mode !== 'restricted') {
         return console.log('Did not recognise mode!')
     }
@@ -87,9 +94,10 @@ const changeMode = (state, mode, sidekey) => {
 }
 
 /**
- * create
- * @param  {object} state
- * @param  {sting} message // Tryte encoded string
+ * Creates a MAM message payload from a state object.
+ * @param {object} state The current mam state.
+ * @param {string} message Tryte encoded string.
+ * @returns {object} Updated state object to be used with future actions.
  */
 const create = (state, message) => {
     const channel = state.channel
@@ -129,14 +137,33 @@ const create = (state, message) => {
     }
 }
 
-// Current root
+/**
+ * Get the root from the mam state.
+ * @param {object} state The mam state.
+ * @returns {string} The root.
+ */
 const getRoot = state => Mam.getMamRoot(state.seed, state.channel)
 
+/**
+ * Enables a user to decode a payload
+ * @param {string} payload Tryte-encoded payload.
+ * @param {string} sidekey Tryte-encoded encryption key. Null value falls back to default key
+ * @param {string} root Tryte-encoded string used as the address to attach the payload.
+ */
 const decode = (payload, sidekey, root) => {
     const key = typeof sidekey === 'string' ? sidekey.padEnd(81, '9') : sidekey
     Mam.decodeMessage(payload, key, root)
 }
 
+/**
+ * Fetches the stream sequentially from a known `root` and optional `sidekey`
+ * @param {string} root Tryte-encoded string used as the entry point to a stream.
+ * @param {string} selectedMode Can one of `public`, `private` or `restricted`
+ * @param {string} sidekey Tryte-encoded encryption key for restricted mode
+ * @param {function} callback Optional callback for each payload retrieved
+ * @param {number} limit Optional, limits the number of items returned
+ * @returns {object} List of messages and the next root.
+ */
 const fetch = async (root, selectedMode, sidekey, callback, limit) => {
     let client = createHttpClient({ provider, attachToTangle })
     let ctx = await createContext()
@@ -171,6 +198,13 @@ const fetch = async (root, selectedMode, sidekey, callback, limit) => {
     }
 }
 
+/**
+ * Fetches a single message from a known `root` and optional `sidekey`
+ * @param {string} root Tryte-encoded string used as the entry point to a stream.
+ * @param {string} selectedMode Can one of `public`, `private` or `restricted`
+ * @param {string} sidekey Tryte-encoded encryption key for restricted mode
+ * @returns {object} The payload and the next root.
+ */
 const fetchSingle = async (root, selectedMode, sidekey) => {
     const response = await fetch(root, selectedMode, sidekey, undefined, 1)
     return response && response.nextRoot ? {
@@ -179,6 +213,11 @@ const fetchSingle = async (root, selectedMode, sidekey) => {
     } : response
 }
 
+/**
+ * Listen to a channel for new messages.
+ * @param {Object} channel The channel object to listen to.
+ * @param {Function} callback Callback called when new messages arrive.
+ */
 const listen = (channel, callback) => {
     let root = channel.root
     return setTimeout(async () => {
@@ -188,6 +227,15 @@ const listen = (channel, callback) => {
     }, channel.timeout)
 }
 
+/**
+ * Attaches a payload to the Tangle.
+ * @param {string} trytes Tryte-encoded payload to be attached to the Tangle.
+ * @param {string} root Tryte-encoded string returned from the `Mam.create()` function.
+ * @param {number} depth Optional depth at which Random Walk starts, defaults to 3.
+ * @param {number} mwm Optional minimum number of trailing zeros in transaction hash, defaults to 9.
+ * @param {string} tag Tag to use when attaching transactions.
+ * @returns {array} Transaction objects that have been attached to the network.
+ */
 const attach = async (trytes, root, depth = 3, mwm = 9, tag = '') => {
     const transfers = [
         {
