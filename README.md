@@ -23,11 +23,11 @@ yarn add @iota/mam
 After adding the package `mam.client.js` it will provide access to the functions described below. To import the module simple use one of the following methods, depending on which version of JavaScript you are using.
 
 ```javascript
-const Mam = require('mam.client.js');
+const Mam = require('@iota/mam');
 
 or
 
-import * as Mam from 'mam.client.js';
+import * as Mam from '@iota/mam';
 ```
 
 For a simple user experience you are advised to call the `init()` function to enable to tracking of state in your channels. When calling `init()` you should pass in the `provider` which is the address of an IRI node. This will provide access to some extra functionality including attaching, fetching and subscribing.
