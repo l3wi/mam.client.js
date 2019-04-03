@@ -11,7 +11,7 @@
         "build-node-prod": "webpack --target node --mode production",
         "build-web-dev": "webpack --target web --mode development",
         "build-web-prod": "webpack --target web --mode production",
-        "dist": "run-s clean lint build-node-dev build-node-prod build-web-dev build-web-prod"
+        "dist": "run-s clean lint build-node-dev build-node-prod build-web-prod"
     },
     "repository": {
         "type": "git",
