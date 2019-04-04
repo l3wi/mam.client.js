@@ -37,7 +37,7 @@ Mam.init(...);
 or in the browser using
 
 ```html
-<script src="./lib/mam.web.js"></script>
+<script src="./lib/mam.web.min.js"></script>
 <script>
     Mam.init(...)
 </script>
