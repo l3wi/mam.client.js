@@ -269,6 +269,8 @@ const setupEnv = rustBindings => (Mam = rustBindings)
 
 const setIOTA = (externalProvider = null) => (provider = externalProvider)
 
+const setAttachToTangle = (externalAttachToTangle = null) => (attachToTangle = externalAttachToTangle)
+
 module.exports = {
     init,
     subscribe,
@@ -281,5 +283,6 @@ module.exports = {
     listen,
     getRoot,
     setIOTA,
+    setAttachToTangle,
     setupEnv
 }
