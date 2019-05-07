@@ -44,12 +44,9 @@ declare module "@iota/mam" {
     }
 
     /**
-     * Initialisation function which returns a state object
-     * @param settings Either a provider string or an object with provider string and attachToTangle method.
-     * @param seed The seed to initialise with.
-     * @param security The security level, defaults to 2.
+     * The mam settings.
      */
-    function init(settings: string | {
+    export interface MamSettings {
         /**
          * The IRI Node provider string.
          */
@@ -58,7 +55,38 @@ declare module "@iota/mam" {
          * Override the attach to tangle method.
          */
         attachToTangle?: AttachToTangle
-    },
+    }
+
+    /**
+     * A mam message
+     */
+    export interface MamMessage {
+        /**
+         * The update mam state.
+         */
+        state: MamState;
+        /**
+         * The payload to attach.
+         */
+        payload: string;
+        /**
+         * The root for the message.
+         */
+        root: string;
+        /**
+         * The address for the message.
+         */
+        address: string;
+    }
+
+    /**
+     * Initialisation function which returns a state object
+     * @param settings Either a provider string or an object with provider string and attachToTangle method.
+     * @param seed The seed to initialise with.
+     * @param security The security level, defaults to 2.
+     * @returns State object to be used with future actions.
+     */
+    function init(settings: string | MamSettings,
         seed?: string, security?: number): MamState;
 
     /**
@@ -66,14 +94,16 @@ declare module "@iota/mam" {
      * @param state The mam state.
      * @param channelRoot The channel root.
      * @param channelKey The optional channel key.
+     * @returns Updated state object to be used with future actions.
      */
-    function subscribe(state: MamState, channelRoot: string, channelKey?: string): void;
+    function subscribe(state: MamState, channelRoot: string, channelKey?: string): MamState;
 
     /**
      * Change the mode of the channel.
      * @param state The mam state.
      * @param mode The new mode.
      * @param sidekey The sideKey required for restricted.
+     * @returns Updated state object to be used with future actions.
      */
     function changeMode(state: MamState, mode: MamMode, sidekey?: string): MamState;
 
@@ -81,19 +111,16 @@ declare module "@iota/mam" {
      * Create a message to use on the mam stream.
      * @param state The mam state.
      * @param message The Tryte encoded message.
+     * @returns An object containing the payload and updated state.
      */
-    function create(state: MamState, message: string): {
-        state: MamState;
-        payload: string;
-        root: string;
-        address: string;
-    };
+    function create(state: MamState, message: string): MamMessage;
 
     /**
      * Decode a message.
      * @param payload The payload of the message.
      * @param sideKey The sideKey used in the message.
      * @param root The root used for the message.
+     * @returns The decoded payload.
      */
     function decode(payload: string, sideKey: string, root: string): string;
 
@@ -107,9 +134,15 @@ declare module "@iota/mam" {
      * @returns The nextRoot and the messages if no callback was supplied, or an Error.
      */
     function fetch(root: string, mode: MamMode, sideKey?: string, callback?: (payload: string) => void, limit?: number): Promise<{
+        /**
+         * The root for the next message.
+         */
         nextRoot: string;
+        /**
+         * All the message payloads.
+         */
         messages?: string[];
-    }>;
+    } | Error>;
 
     /**
      * Fetch a single message asynchronously.
@@ -119,9 +152,15 @@ declare module "@iota/mam" {
      * @returns The nextRoot and the payload, or an Error.
      */
     function fetchSingle(root: string, mode: MamMode, sideKey?: string): Promise<{
+        /**
+         * The root for the next message.
+         */
         nextRoot: string;
-        payload: string;
-    }>;
+        /**
+         * The payload for the message.
+         */
+        payload?: string;
+    } | Error>;
 
     /**
      * Attach the mam trytes to the tangle.
@@ -132,7 +171,7 @@ declare module "@iota/mam" {
      * @param tag Trytes to tag the message with.
      * @returns The transaction objects.
      */
-    function attach(trytes: string, root: string, depth?: number, mwm?: number, tag?: string): Promise<Transaction[]>;
+    function attach(trytes: string, root: string, depth?: number, mwm?: number, tag?: string): Promise<ReadonlyArray<Transaction>>;
 
     /**
      * Listen for new message on the channel.
@@ -152,7 +191,13 @@ declare module "@iota/mam" {
      * Set the provider.
      * @param provider The IOTA provider to use.
      */
-    function setIOTA(provider: string): void;
+    function setIOTA(provider?: string): void;
+
+    /**
+     * Set the attachToTangle.
+     * @param attachToTangle The attach to tangle method to use.
+     */
+    function setAttachToTangle(attachToTangle?: AttachToTangle): void;
 
     export {
         init,
@@ -165,6 +210,7 @@ declare module "@iota/mam" {
         attach,
         listen,
         getRoot,
-        setIOTA
+        setIOTA,
+        setAttachToTangle
     };
 }
